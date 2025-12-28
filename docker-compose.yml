@@ -1,0 +1,172 @@
+# Docker Compose est un outil qui permet de définir et gérer plusieurs conteneurs Docker.
+# Chaque "service" ci-dessous est un conteneur séparé qui fait tourner un logiciel spécifique.
+
+version: '3.8'  # Version du format Docker Compose
+
+services:  # Liste de tous les services (conteneurs) que nous voulons démarrer
+
+  # Premier service : PostgreSQL avec l'extension PostGIS
+  postgres:
+    # L'image Docker à utiliser. postgis/postgis est une version de PostgreSQL
+    # qui inclut l'extension PostGIS pour les données géospatiales.
+    # La version 15-3.3 signifie PostgreSQL 15 avec PostGIS 3.3
+    image: postgis/postgis:17-3.5.3
+    
+    # Nom personnalisé du conteneur (plus facile à identifier)
+    container_name: pickndrop_postgres
+    
+    # Variables d'environnement qui configurent PostgreSQL
+    environment:
+      # Nom de la base de données qui sera créée automatiquement au démarrage
+      POSTGRES_DB: pickndrop_db
+      
+      # Nom d'utilisateur pour se connecter à la base de données
+      POSTGRES_USER: postgres
+      
+      # Mot de passe de l'utilisateur
+      # IMPORTANT : En production, ne JAMAIS mettre le mot de passe en dur comme ça.
+      # Ici c'est juste pour le développement local.
+      POSTGRES_PASSWORD: jeff1234
+    
+    # Mappage des ports : port_sur_votre_machine:port_dans_le_conteneur
+    # Cela signifie que vous pourrez accéder à PostgreSQL sur localhost:5432
+    ports:
+      - "5432:5432"
+    
+    # Volume pour persister les données
+    # Sans cela, toutes les données seraient perdues quand vous arrêtez le conteneur.
+    # Ici, on dit à Docker de sauvegarder les données de PostgreSQL dans un volume nommé.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    # Configuration santé : Docker va régulièrement vérifier si PostgreSQL fonctionne
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pickndrop_user -d pickndrop"]
+      interval: 10s  # Vérifier toutes les 10 secondes
+      timeout: 5s    # Attendre maximum 5 secondes pour une réponse
+      retries: 5     # Réessayer 5 fois avant de considérer le service comme mort
+    
+    # Réseau Docker auquel ce conteneur appartient
+    networks:
+      - pickndrop_network
+
+  # Deuxième service : Redis (cache en mémoire)
+  redis:
+    # Image officielle de Redis. Alpine est une version Linux ultra-légère.
+    image: redis:7.2-alpine
+    
+    container_name: pickndrop_redis
+    
+    # Port pour accéder à Redis
+    ports:
+      - "6379:6379"
+    
+    # Commande de démarrage personnalisée pour Redis
+    # --appendonly yes active la persistance sur disque
+    command: redis-server --appendonly yes
+    
+    # Volume pour persister les données de Redis
+    volumes:
+      - redis_data:/data
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    networks:
+      - pickndrop_network
+
+  # Troisième service : Zookeeper (nécessaire pour Kafka)
+  # Zookeeper est un service de coordination distribué utilisé par Kafka
+  # pour gérer son cluster.
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: pickndrop_zookeeper
+    
+    environment:
+      # Port sur lequel Zookeeper écoute
+      ZOOKEEPER_CLIENT_PORT: 2181
+      
+      # Fréquence des heartbeats en millisecondes
+      ZOOKEEPER_TICK_TIME: 2000
+    
+    ports:
+      - "2181:2181"
+    
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    
+    networks:
+      - pickndrop_network
+
+  # Quatrième service : Kafka (système de messagerie distribué)
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: pickndrop_kafka
+    
+    # Ce service dépend de Zookeeper, donc Docker va démarrer Zookeeper d'abord
+    depends_on:
+      - zookeeper
+    
+    ports:
+      - "9092:9092"  # Port pour les connexions externes
+      - "29092:29092"  # Port pour les connexions internes (entre conteneurs)
+    
+    environment:
+      # ID unique du broker Kafka
+      KAFKA_BROKER_ID: 1
+      
+      # Adresse de Zookeeper (nom_du_conteneur:port)
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      
+      # Adresses que les clients utilisent pour se connecter à Kafka
+      # PLAINTEXT:// = sans encryption
+      # localhost:9092 est pour votre application Java sur votre machine
+      # kafka:29092 est pour d'autres services Docker
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      
+      # Mapping des protocoles d'écoute
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      
+      # Facteur de réplication par défaut (1 car nous n'avons qu'un seul broker)
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      
+      # Intervalle de heartbeat du broker
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    
+    networks:
+      - pickndrop_network
+
+# Définition des volumes Docker pour persister les données
+# Ces volumes sont stockés par Docker et survivent à l'arrêt des conteneurs
+volumes:
+  postgres_data:
+    driver: local  # Stocké localement sur votre machine
+  redis_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_logs:
+    driver: local
+  kafka_data:
+    driver: local
+
+# Définition du réseau Docker
+# Tous les conteneurs du même réseau peuvent communiquer entre eux
+# en utilisant leurs noms comme adresse (ex: postgres:5432)
+networks:
+  pickndrop_network:
+    driver: bridge  # Type de réseau le plus courant

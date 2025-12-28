@@ -1,0 +1,167 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.yowyob.delivery:route-service >------------------
+[INFO] Building Logistics Routing API 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ route-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 6 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ route-service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ route-service ---
+[INFO] skip non existing resourceDirectory E:\backend\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ route-service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ route-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.yowyob.delivery.route.controller.DeliveryControllerTest
+09:57:31.273 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.yowyob.delivery.route.controller.DeliveryControllerTest]: DeliveryControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+09:57:31.574 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.yowyob.delivery.route.RouteApplication for test class com.yowyob.delivery.route.controller.DeliveryControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2025-12-23T09:57:32.381+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.c.DeliveryControllerTest         : Starting DeliveryControllerTest using Java 21 with PID 26900 (started by HP PROBOOK in E:\backend\backend)
+2025-12-23T09:57:32.385+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.c.DeliveryControllerTest         : No active profile set, falling back to 1 default profile: "default"
+2025-12-23T09:57:36.623+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.c.DeliveryControllerTest         : Started DeliveryControllerTest in 4.939 seconds (process running for 6.768)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.467 s -- in com.yowyob.delivery.route.controller.DeliveryControllerTest
+[INFO] Running com.yowyob.delivery.route.controller.HubControllerTest
+2025-12-23T09:57:37.490+01:00  INFO 26900 --- [route-service] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.yowyob.delivery.route.controller.HubControllerTest]: HubControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-23T09:57:37.533+01:00  INFO 26900 --- [route-service] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.yowyob.delivery.route.RouteApplication for test class com.yowyob.delivery.route.controller.HubControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2025-12-23T09:57:37.674+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.HubControllerTest     : Starting HubControllerTest using Java 21 with PID 26900 (started by HP PROBOOK in E:\backend\backend)
+2025-12-23T09:57:37.675+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.HubControllerTest     : No active profile set, falling back to 1 default profile: "default"
+2025-12-23T09:57:38.338+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.HubControllerTest     : Started HubControllerTest in 0.797 seconds (process running for 8.483)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.049 s -- in com.yowyob.delivery.route.controller.HubControllerTest
+[INFO] Running com.yowyob.delivery.route.controller.ParcelControllerTest
+2025-12-23T09:57:38.549+01:00  INFO 26900 --- [route-service] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.yowyob.delivery.route.controller.ParcelControllerTest]: ParcelControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-23T09:57:38.592+01:00  INFO 26900 --- [route-service] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.yowyob.delivery.route.RouteApplication for test class com.yowyob.delivery.route.controller.ParcelControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2025-12-23T09:57:38.680+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.ParcelControllerTest  : Starting ParcelControllerTest using Java 21 with PID 26900 (started by HP PROBOOK in E:\backend\backend)
+2025-12-23T09:57:38.681+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.ParcelControllerTest  : No active profile set, falling back to 1 default profile: "default"
+2025-12-23T09:57:39.255+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.ParcelControllerTest  : Started ParcelControllerTest in 0.647 seconds (process running for 9.402)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.940 s -- in com.yowyob.delivery.route.controller.ParcelControllerTest
+[INFO] Running com.yowyob.delivery.route.controller.RouteControllerTest
+2025-12-23T09:57:39.490+01:00  INFO 26900 --- [route-service] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.yowyob.delivery.route.controller.RouteControllerTest]: RouteControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-12-23T09:57:39.516+01:00  INFO 26900 --- [route-service] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.yowyob.delivery.route.RouteApplication for test class com.yowyob.delivery.route.controller.RouteControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2025-12-23T09:57:39.583+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.RouteControllerTest   : Starting RouteControllerTest using Java 21 with PID 26900 (started by HP PROBOOK in E:\backend\backend)
+2025-12-23T09:57:39.584+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.RouteControllerTest   : No active profile set, falling back to 1 default profile: "default"
+2025-12-23T09:57:39.988+01:00  INFO 26900 --- [route-service] [           main] c.y.d.r.controller.RouteControllerTest   : Started RouteControllerTest in 0.466 seconds (process running for 10.133)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.583 s -- in com.yowyob.delivery.route.controller.RouteControllerTest
+[INFO] Running com.yowyob.delivery.route.mapper.HubMapperTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in com.yowyob.delivery.route.mapper.HubMapperTest
+[INFO] Running com.yowyob.delivery.route.mapper.ParcelMapperTest
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.261 s <<< FAILURE! -- in com.yowyob.delivery.route.mapper.ParcelMapperTest
+[ERROR] com.yowyob.delivery.route.mapper.ParcelMapperTest.shouldMapParcelToResponseDTO -- Time elapsed: 0.045 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <EN_TRANSIT> but was: <IN_TRANSIT>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at com.yowyob.delivery.route.mapper.ParcelMapperTest.shouldMapParcelToResponseDTO(ParcelMapperTest.java:59)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] Running com.yowyob.delivery.route.mapper.RouteMapperTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in com.yowyob.delivery.route.mapper.RouteMapperTest
+[INFO] Running com.yowyob.delivery.route.service.impl.DijkstraRoutingStrategyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.543 s -- in com.yowyob.delivery.route.service.impl.DijkstraRoutingStrategyTest
+[INFO] Running com.yowyob.delivery.route.service.impl.HubServiceImplTest
+2025-12-23T09:57:41.190+01:00  INFO 26900 --- [route-service] [           main] c.y.d.route.service.impl.HubServiceImpl  : Creating hub: Test Address
+2025-12-23T09:57:41.198+01:00  INFO 26900 --- [route-service] [           main] c.y.d.route.service.impl.HubServiceImpl  : Hub created with ID: 3271575f-b07c-4e61-ac1c-8d2c9d19da8b
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.108 s <<< FAILURE! -- in com.yowyob.delivery.route.service.impl.HubServiceImplTest
+[ERROR] com.yowyob.delivery.route.service.impl.HubServiceImplTest.shouldCreateHub -- Time elapsed: 0.046 s <<< ERROR!
+org.mockito.exceptions.misusing.UnnecessaryStubbingException: 
+
+Unnecessary stubbings detected.
+Clean & maintainable test code requires zero unnecessary code.
+Following stubbings are unnecessary (click to navigate to relevant line of code):
+  1. -> at com.yowyob.delivery.route.service.impl.HubServiceImplTest.shouldCreateHub(HubServiceImplTest.java:50)
+Please remove unnecessary stubbings or use 'lenient' strictness. More info: javadoc for UnnecessaryStubbingException class.
+	at org.mockito.junit.jupiter.MockitoExtension.afterEach(MockitoExtension.java:197)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] Running com.yowyob.delivery.route.service.impl.ParcelServiceImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.217 s -- in com.yowyob.delivery.route.service.impl.ParcelServiceImplTest
+[INFO] Running com.yowyob.delivery.route.service.impl.RouteServiceImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.323 s -- in com.yowyob.delivery.route.service.impl.RouteServiceImplTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ParcelMapperTest.shouldMapParcelToResponseDTO:59 expected: <EN_TRANSIT> but was: <IN_TRANSIT>
+[ERROR] Errors: 
+[ERROR]   HubServiceImplTest.shouldCreateHub ╗ UnnecessaryStubbing 
+Unnecessary stubbings detected.
+Clean & maintainable test code requires zero unnecessary code.
+Following stubbings are unnecessary (click to navigate to relevant line of code):
+  1. -> at com.yowyob.delivery.route.service.impl.HubServiceImplTest.shouldCreateHub(HubServiceImplTest.java:50)
+Please remove unnecessary stubbings or use 'lenient' strictness. More info: javadoc for UnnecessaryStubbingException class.
+[INFO] 
+[ERROR] Tests run: 31, Failures: 1, Errors: 1, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.173 s
+[INFO] Finished at: 2025-12-23T09:57:41+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project route-service: There are test failures.
+[ERROR] 
+[ERROR] See E:\backend\backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

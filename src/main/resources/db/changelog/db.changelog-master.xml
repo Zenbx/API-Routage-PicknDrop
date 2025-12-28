@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="delivery-system">
+        <sql>CREATE EXTENSION IF NOT EXISTS postgis;</sql>
+    </changeSet>
+
+    <changeSet id="2" author="delivery-system">
+        <sql splitStatements="false">
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'driver_state') THEN
+                    CREATE TYPE driver_state AS ENUM ('AVAILABLE', 'BUSY', 'OFFLINE', 'ON_BREAK');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'hub_type') THEN
+                    CREATE TYPE hub_type AS ENUM ('WAREHOUSE', 'TRANSIT_POINT', 'DISTRIBUTION_CENTER', 'SORTING_CENTER');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'parcel_state') THEN
+                    CREATE TYPE parcel_state AS ENUM ('PLANNED', 'PENDING_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED', 'FAILED', 'CANCELLED', 'RETURNED');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'parcel_priority') THEN
+                    CREATE TYPE parcel_priority AS ENUM ('LOW', 'NORMAL', 'HIGH', 'URGENT');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type') THEN
+                    CREATE TYPE vehicle_type AS ENUM ('MOTORCYCLE', 'CAR', 'VAN', 'TRUCK', 'BICYCLE');
+                END IF;
+            END$$;
+        </sql>
+        <rollback>
+            <sql>
+                DROP TYPE IF EXISTS vehicle_type;
+                DROP TYPE IF EXISTS parcel_priority;
+                DROP TYPE IF EXISTS parcel_state;
+                DROP TYPE IF EXISTS hub_type;
+                DROP TYPE IF EXISTS driver_state;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="3" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="vehicles"/>
+            </not>
+        </preConditions>
+        <createTable tableName="vehicles">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="license_plate" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="vehicle_type" type="vehicle_type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="brand" type="VARCHAR(50)"/>
+            <column name="model" type="VARCHAR(50)"/>
+            <column name="manufacture_year" type="INTEGER"/>
+            <column name="max_capacity_kg" type="DECIMAL(10,2)"/>
+            <column name="cargo_volume_m3" type="DECIMAL(10,2)"/>
+            <column name="total_distance_km" type="DECIMAL(12,2)" defaultValueNumeric="0"/>
+            <column name="last_maintenance_date" type="TIMESTAMP"/>
+            <column name="next_maintenance_date" type="TIMESTAMP"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="vehicles" indexName="idx_vehicles_license_plate">
+            <column name="license_plate"/>
+        </createIndex>
+        <createIndex tableName="vehicles" indexName="idx_vehicles_is_active">
+            <column name="is_active"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="4" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="drivers"/>
+            </not>
+        </preConditions>
+        <createTable tableName="drivers">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="license_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="current_state" type="driver_state" defaultValue="OFFLINE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_location" type="GEOMETRY(Point, 4326)"/>
+            <column name="rating" type="DECIMAL(3,2)" defaultValueNumeric="0"/>
+            <column name="total_deliveries" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vehicle_id" type="UUID"/>
+            <column name="last_location_update" type="TIMESTAMP"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="drivers"
+                baseColumnNames="vehicle_id"
+                constraintName="fk_drivers_vehicle"
+                referencedTableName="vehicles"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <createIndex tableName="drivers" indexName="idx_drivers_phone">
+            <column name="phone_number"/>
+        </createIndex>
+        <createIndex tableName="drivers" indexName="idx_drivers_email">
+            <column name="email"/>
+        </createIndex>
+        <createIndex tableName="drivers" indexName="idx_drivers_state">
+            <column name="current_state"/>
+        </createIndex>
+        <createIndex tableName="drivers" indexName="idx_drivers_is_active">
+            <column name="is_active"/>
+        </createIndex>
+        <sql>CREATE INDEX IF NOT EXISTS idx_drivers_location ON drivers USING GIST(current_location);</sql>
+    </changeSet>
+
+    <changeSet id="5" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="hubs"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="hubs">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="hub_type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="GEOMETRY(Point, 4326)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="hubs" indexName="idx_hubs_type">
+            <column name="type"/>
+        </createIndex>
+        <sql>CREATE INDEX IF NOT EXISTS idx_hubs_location ON hubs USING GIST(location);</sql>
+    </changeSet>
+
+    <changeSet id="6" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="hub_connections"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="hub_connections">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="from_hub_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_hub_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="weight" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="hub_connections"
+                baseColumnNames="from_hub_id"
+                constraintName="fk_hub_connections_from_hub"
+                referencedTableName="hubs"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="hub_connections"
+                baseColumnNames="to_hub_id"
+                constraintName="fk_hub_connections_to_hub"
+                referencedTableName="hubs"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="hub_connections" indexName="idx_hub_connections_from">
+            <column name="from_hub_id"/>
+        </createIndex>
+        <createIndex tableName="hub_connections" indexName="idx_hub_connections_to">
+            <column name="to_hub_id"/>
+        </createIndex>
+
+        <addUniqueConstraint
+                tableName="hub_connections"
+                columnNames="from_hub_id, to_hub_id"
+                constraintName="uk_hub_connections_from_to"/>
+    </changeSet>
+
+    <changeSet id="7" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="parcels"/>
+            </not>
+        </preConditions>
+        <createTable tableName="parcels">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tracking_code" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="driver_id" type="UUID"/>
+            <column name="vehicle_id" type="UUID"/>
+            <column name="current_state" type="parcel_state" defaultValue="PLANNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="parcel_priority" defaultValue="NORMAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_phone" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipient_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipient_phone" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pickup_location" type="GEOMETRY(Point, 4326)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pickup_address" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_location" type="GEOMETRY(Point, 4326)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_address" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="weight_kg" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="declared_value_xaf" type="DECIMAL(15,2)"/>
+            <column name="distance_km" type="DECIMAL(10,2)"/>
+            <column name="delivery_fee_xaf" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="estimated_delivery_time" type="TIMESTAMP"/>
+            <column name="actual_delivery_time" type="TIMESTAMP"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="parcels"
+                baseColumnNames="driver_id"
+                constraintName="fk_parcels_driver"
+                referencedTableName="drivers"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <addForeignKeyConstraint
+                baseTableName="parcels"
+                baseColumnNames="vehicle_id"
+                constraintName="fk_parcels_vehicle"
+                referencedTableName="vehicles"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <createIndex tableName="parcels" indexName="idx_parcels_tracking_code">
+            <column name="tracking_code"/>
+        </createIndex>
+        <createIndex tableName="parcels" indexName="idx_parcels_driver">
+            <column name="driver_id"/>
+        </createIndex>
+        <createIndex tableName="parcels" indexName="idx_parcels_state">
+            <column name="current_state"/>
+        </createIndex>
+        <createIndex tableName="parcels" indexName="idx_parcels_priority">
+            <column name="priority"/>
+        </createIndex>
+        <createIndex tableName="parcels" indexName="idx_parcels_created_at">
+            <column name="created_at"/>
+        </createIndex>
+        <sql>CREATE INDEX IF NOT EXISTS idx_parcels_pickup_location ON parcels USING GIST(pickup_location);</sql>
+        <sql>CREATE INDEX IF NOT EXISTS idx_parcels_delivery_location ON parcels USING GIST(delivery_location);</sql>
+    </changeSet>
+
+    <changeSet id="8" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="routes"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="routes">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parcel_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="driver_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_geometry" type="GEOMETRY(LineString, 4326)"/>
+            <column name="waypoints" type="JSONB"/>
+            <column name="total_distance_km" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="estimated_duration_minutes" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="routing_service" type="VARCHAR(50)"/>
+            <column name="traffic_factor" type="DECIMAL(5,2)" defaultValueNumeric="1.0"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="routes"
+                baseColumnNames="parcel_id"
+                constraintName="fk_routes_parcel"
+                referencedTableName="parcels"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="routes"
+                baseColumnNames="driver_id"
+                constraintName="fk_routes_driver"
+                referencedTableName="drivers"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="routes" indexName="idx_routes_parcel">
+            <column name="parcel_id"/>
+        </createIndex>
+        <createIndex tableName="routes" indexName="idx_routes_driver">
+            <column name="driver_id"/>
+        </createIndex>
+        <createIndex tableName="routes" indexName="idx_routes_is_active">
+            <column name="is_active"/>
+        </createIndex>
+        <sql>CREATE INDEX IF NOT EXISTS idx_routes_geometry ON routes USING GIST(route_geometry);</sql>
+    </changeSet>
+
+    <changeSet id="9" author="delivery-system">
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION update_updated_at_column()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS update_updated_at_column();
+        </rollback>
+    </changeSet>
+
+    <changeSet id="10" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'update_vehicles_updated_at' AND event_object_table = 'vehicles'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE TRIGGER update_vehicles_updated_at
+            BEFORE UPDATE ON vehicles
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS update_vehicles_updated_at ON vehicles;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="11" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'update_drivers_updated_at' AND event_object_table = 'drivers'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE TRIGGER update_drivers_updated_at
+            BEFORE UPDATE ON drivers
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS update_drivers_updated_at ON drivers;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="12" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'update_hubs_updated_at' AND event_object_table = 'hubs'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE TRIGGER update_hubs_updated_at
+            BEFORE UPDATE ON hubs
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS update_hubs_updated_at ON hubs;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="13" author="delivery-system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'update_parcels_updated_at' AND event_object_table = 'parcels'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE TRIGGER update_parcels_updated_at
+            BEFORE UPDATE ON parcels
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS update_parcels_updated_at ON parcels;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

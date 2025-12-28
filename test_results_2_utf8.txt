@@ -1,0 +1,76 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.yowyob.delivery:route-service >------------------
+[INFO] Building Logistics Routing API 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ route-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 6 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ route-service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ route-service ---
+[INFO] skip non existing resourceDirectory E:\backend\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ route-service ---
+[INFO] Changes detected - recompiling the module! :input tree
+[INFO] Compiling 11 source files with javac [debug release 17] to target\test-classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/DeliveryControllerTest.java:[25,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/DeliveryControllerTest.java:[25,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/DeliveryControllerTest.java:[25,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/DeliveryControllerTest.java:[25,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/DeliveryControllerTest.java:[25,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/ParcelControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/ParcelControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/ParcelControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/ParcelControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/ParcelControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/RouteControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/RouteControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/RouteControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/RouteControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/RouteControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/HubControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/HubControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/HubControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/HubControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/controller/HubControllerTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[INFO] 20 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/service/impl/HubServiceImplTest.java:[94,45] cannot find symbol
+  symbol:   variable r2
+  location: class com.yowyob.delivery.route.service.impl.HubServiceImplTest
+[ERROR] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/service/impl/HubServiceImplTest.java:[93,45] cannot find symbol
+  symbol:   variable r1
+  location: class com.yowyob.delivery.route.service.impl.HubServiceImplTest
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.858 s
+[INFO] Finished at: 2025-12-23T09:37:49+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project route-service: Compilation failure: Compilation failure: 
+[ERROR] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/service/impl/HubServiceImplTest.java:[94,45] cannot find symbol
+[ERROR]   symbol:   variable r2
+[ERROR]   location: class com.yowyob.delivery.route.service.impl.HubServiceImplTest
+[ERROR] /E:/backend/backend/src/test/java/com/yowyob/delivery/route/service/impl/HubServiceImplTest.java:[93,45] cannot find symbol
+[ERROR]   symbol:   variable r1
+[ERROR]   location: class com.yowyob.delivery.route.service.impl.HubServiceImplTest
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
