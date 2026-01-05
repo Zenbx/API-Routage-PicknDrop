@@ -80,4 +80,22 @@ class RouteControllerTest {
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(id.toString());
     }
+
+    @Test
+    void shouldReturn422WhenNoPathFound() {
+        RouteCalculationRequestDTO request = new RouteCalculationRequestDTO();
+        request.setStartHubId(UUID.randomUUID());
+        request.setEndHubId(UUID.randomUUID());
+
+        when(routeService.calculateRoute(any())).thenReturn(Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found")));
+
+        webTestClient.post()
+                .uri("/api/v1/routes/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Unprocessable Entity");
+    }
 }

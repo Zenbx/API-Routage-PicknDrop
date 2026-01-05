@@ -66,7 +66,7 @@ class RouteServiceImplTest {
         when(hubRepository.findById(startHubId)).thenReturn(Mono.just(startHub));
         when(hubRepository.findById(endHubId)).thenReturn(Mono.just(endHub));
         when(basicStrategy.calculateOptimalRoute(any(), any(), any())).thenReturn(Mono.just(route));
-        when(routeRepository.save(any())).thenReturn(Mono.just(route));
+        when(routeRepository.saveWithGeometry(any())).thenReturn(Mono.just(route));
         when(routeMapper.toResponseDTO(any())).thenReturn(responseDTO);
 
         Mono<RouteResponseDTO> result = routeService.calculateRoute(request);
@@ -76,7 +76,7 @@ class RouteServiceImplTest {
                 .verifyComplete();
 
         verify(basicStrategy).calculateOptimalRoute(eq(startHub), eq(endHub), any());
-        verify(routeRepository).save(any());
+        verify(routeRepository).saveWithGeometry(any());
     }
 
     @Test
@@ -101,7 +101,7 @@ class RouteServiceImplTest {
         when(hubRepository.findById(startHubId)).thenReturn(Mono.just(startHub));
         when(hubRepository.findById(endHubId)).thenReturn(Mono.just(endHub));
         when(dijkstraStrategy.calculateOptimalRoute(any(), any(), any())).thenReturn(Mono.just(route));
-        when(routeRepository.save(any())).thenReturn(Mono.just(route));
+        when(routeRepository.saveWithGeometry(any())).thenReturn(Mono.just(route));
         when(routeMapper.toResponseDTO(any())).thenReturn(responseDTO);
 
         Mono<RouteResponseDTO> result = routeService.calculateRoute(request);

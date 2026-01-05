@@ -58,11 +58,19 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
                         if (current.getId().equals(end.getId()))
                             break;
 
+                        // Consider both directions so the graph behaves as undirected when appropriate
                         allConnections.stream()
-                                .filter(c -> c.getFromHubId().equals(current.getId()))
+                                .filter(c -> c.getFromHubId().equals(current.getId()) || c.getToHubId().equals(current.getId()))
                                 .forEach(connection -> {
-                                    UUID neighborId = connection.getToHubId();
-                                    double newDist = distances.get(current.getId()) + connection.getWeight();
+                                    UUID neighborId;
+                                    if (connection.getFromHubId().equals(current.getId())) {
+                                        neighborId = connection.getToHubId();
+                                    } else {
+                                        neighborId = connection.getFromHubId();
+                                    }
+
+                                    double weight = connection.getWeight() == null ? 0.0 : connection.getWeight();
+                                    double newDist = distances.get(current.getId()) + weight;
 
                                     if (newDist < distances.get(neighborId)) {
                                         distances.put(neighborId, newDist);
@@ -92,7 +100,7 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
     private Mono<Route> buildRouteFromPath(Hub start, Hub end, Map<UUID, UUID> previous, Double totalDistance,
             List<Hub> allHubs) {
         if (!previous.containsKey(end.getId()) && !start.getId().equals(end.getId())) {
-            return Mono.error(new RuntimeException("No path found"));
+            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found between hubs"));
         }
 
         List<Coordinate> coordinates = new ArrayList<>();
@@ -103,6 +111,16 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
             Point pt = hubMapper.wktToPoint(hub.getLocation());
             coordinates.add(0, pt.getCoordinate());
             currentId = previous.get(currentId);
+        }
+
+        if (coordinates.isEmpty()) {
+            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found between hubs"));
+        }
+
+        // JTS LineString requires at least 2 points. If start == end we duplicate the coordinate.
+        if (coordinates.size() == 1) {
+            Coordinate c = coordinates.get(0);
+            coordinates.add(new Coordinate(c.x, c.y));
         }
 
         LineString path = geometryFactory.createLineString(coordinates.toArray(new Coordinate[0]));

@@ -55,7 +55,7 @@ class DijkstraRoutingStrategyTest {
                 .weight(10.0)
                 .build();
 
-        when(hubRepository.findAll()).thenReturn(reactor.core.publisher.Flux.just(hubA, hubB));
+        when(hubRepository.findAllWithLocation()).thenReturn(reactor.core.publisher.Flux.just(hubA, hubB));
         when(connectionRepository.findAll()).thenReturn(reactor.core.publisher.Flux.just(conn));
         when(hubMapper.wktToPoint("POINT(0 0)")).thenReturn(ptA);
         when(hubMapper.wktToPoint("POINT(1 1)")).thenReturn(ptB);
@@ -65,5 +65,11 @@ class DijkstraRoutingStrategyTest {
 
         assertNotNull(route);
         assertNotNull(route.getRouteGeometry());
+
+        // Reverse direction should also succeed when treating edges as undirected
+        Mono<Route> reverse = dijkstraStrategy.calculateOptimalRoute(hubB, hubA, new RoutingConstraintsDTO());
+        Route reverseRoute = reverse.block();
+        assertNotNull(reverseRoute);
+        assertNotNull(reverseRoute.getRouteGeometry());
     }
 }

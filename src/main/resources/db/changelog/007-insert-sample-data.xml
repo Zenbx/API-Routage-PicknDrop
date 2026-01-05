@@ -44,8 +44,21 @@
             WHERE h1.address LIKE 'Douala%' AND h2.address LIKE 'Yaoundé%'
             ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
 
+            -- Add reverse connections to make the graph bidirectional
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 240.5
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Douala%' AND h2.address LIKE 'Yaoundé%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
             INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
             SELECT gen_random_uuid(), h1.id, h2.id, 290.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Bafoussam%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 290.0
             FROM hubs h1, hubs h2
             WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Bafoussam%'
             ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
@@ -57,7 +70,19 @@
             ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
 
             INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 180.2
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Kribi%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
             SELECT gen_random_uuid(), h1.id, h2.id, 1100.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Garoua%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 1100.0
             FROM hubs h1, hubs h2
             WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Garoua%'
             ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;

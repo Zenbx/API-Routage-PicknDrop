@@ -117,6 +117,44 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Gère le cas où le corps de la requête est mal formé (JSON invalide)
+     */
+    @ExceptionHandler(org.springframework.web.server.ServerWebInputException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleWebInputException(
+            org.springframework.web.server.ServerWebInputException ex,
+            ServerWebExchange exchange) {
+        log.error("Malformed request body: {}", ex.getMessage());
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("path", exchange.getRequest().getPath().value());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+        errorResponse.put("error", "Malformed Request");
+        errorResponse.put("message", "Malformed JSON or invalid request body: " + ex.getMessage());
+
+        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+    }
+
+    /**
+     * Gère les cas où aucun chemin n'a pu être trouvé
+     */
+    @ExceptionHandler(com.yowyob.delivery.route.controller.exception.NoPathFoundException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleNoPathFoundException(
+            com.yowyob.delivery.route.controller.exception.NoPathFoundException ex,
+            ServerWebExchange exchange) {
+        log.warn("No path found: {}", ex.getMessage());
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("path", exchange.getRequest().getPath().value());
+        errorResponse.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        errorResponse.put("error", "Unprocessable Entity");
+        errorResponse.put("message", ex.getMessage());
+
+        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+    }
+
+    /**
      * Gère toutes les autres exceptions non prévues
      */
     @ExceptionHandler(Exception.class)
