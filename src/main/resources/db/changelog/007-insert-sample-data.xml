@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-sample-data-v3" author="antigravity">
+        <comment>Inserting realistic logistics data for Cameroon with conflict handling</comment>
+        
+        <!-- 1. HUBS -->
+        <sql>
+            -- Hubs in major Cameroon cities
+            INSERT INTO hubs (id, address, type, location) VALUES
+            -- Douala (8 hubs for diversity)
+            (gen_random_uuid(), 'Douala Central Logistique, Akwa', 'WAREHOUSE', ST_GeomFromText('POINT(9.7085 4.0503)', 4326)),
+            (gen_random_uuid(), 'Douala Port Terminal A', 'WAREHOUSE', ST_GeomFromText('POINT(9.6885 4.0403)', 4326)),
+            (gen_random_uuid(), 'Bonabéri Industrial Zone Hub', 'DISTRIBUTION_CENTER', ST_GeomFromText('POINT(9.6585 4.0703)', 4326)),
+            (gen_random_uuid(), 'Deïdo Sorting Center', 'SORTING_CENTER', ST_GeomFromText('POINT(9.7185 4.0603)', 4326)),
+            (gen_random_uuid(), 'Bassa Logistics Park', 'DISTRIBUTION_CENTER', ST_GeomFromText('POINT(9.7485 4.0403)', 4326)),
+            (gen_random_uuid(), 'New Bell Transit Point', 'TRANSIT_POINT', ST_GeomFromText('POINT(9.7285 4.0203)', 4326)),
+            (gen_random_uuid(), 'Logbaba Supply Hub', 'WAREHOUSE', ST_GeomFromText('POINT(9.7685 4.0303)', 4326)),
+            (gen_random_uuid(), 'Bonapriso Express Center', 'DISTRIBUTION_CENTER', ST_GeomFromText('POINT(9.7000 4.0250)', 4326)),
+            
+            -- Yaoundé
+            (gen_random_uuid(), 'Yaoundé Mvan Distribution Center', 'DISTRIBUTION_CENTER', ST_GeomFromText('POINT(11.5021 3.8480)', 4326)),
+            (gen_random_uuid(), 'Yaoundé Ekounou Sorting', 'SORTING_CENTER', ST_GeomFromText('POINT(11.5321 3.8280)', 4326)),
+            (gen_random_uuid(), 'Yaoundé Bastos Transit', 'TRANSIT_POINT', ST_GeomFromText('POINT(11.5121 3.8980)', 4326)),
+            
+            -- Others
+            (gen_random_uuid(), 'Bafoussam Transit Point', 'TRANSIT_POINT', ST_GeomFromText('POINT(10.4167 5.4833)', 4326)),
+            (gen_random_uuid(), 'Kribi Deep Sea Port Hub', 'WAREHOUSE', ST_GeomFromText('POINT(9.9083 2.9506)', 4326)),
+            (gen_random_uuid(), 'Garoua Northern Hub', 'SORTING_CENTER', ST_GeomFromText('POINT(13.4000 9.3000)', 4326)),
+            (gen_random_uuid(), 'Bamenda Western Hub', 'DISTRIBUTION_CENTER', ST_GeomFromText('POINT(10.1500 5.9600)', 4326)),
+            (gen_random_uuid(), 'Ngaoundéré Central Hub', 'WAREHOUSE', ST_GeomFromText('POINT(13.5833 7.3167)', 4326))
+            ON CONFLICT (id) DO NOTHING;
+        </sql>
+
+        <!-- 2. HUB CONNECTIONS -->
+        <sql>
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h1.id, h2.id, 240.5
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Douala%' AND h2.address LIKE 'Yaoundé%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h1.id, h2.id, 290.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Bafoussam%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h1.id, h2.id, 180.2
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Kribi%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h1.id, h2.id, 1100.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Garoua%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+        </sql>
+
+        <!-- 3. VEHICLES -->
+        <sql>
+            INSERT INTO vehicles (id, license_plate, vehicle_type, brand, model, manufacture_year, max_capacity_kg, cargo_volume_m3) VALUES
+            (gen_random_uuid(), 'LT 123 AA', 'TRUCK', 'Mercedes-Benz', 'Actros', 2020, 15000.0, 40.0),
+            (gen_random_uuid(), 'CE 456 BB', 'VAN', 'Toyota', 'Hiace', 2022, 1200.0, 6.0),
+            (gen_random_uuid(), 'NW 789 CC', 'MOTORCYCLE', 'Honda', 'Ace 125', 2023, 150.0, 0.5),
+            (gen_random_uuid(), 'SW 001 DD', 'CAR', 'Volkswagen', 'Caddy', 2021, 800.0, 3.2)
+            ON CONFLICT (license_plate) DO NOTHING;
+        </sql>
+
+        <!-- 4. DRIVERS -->
+        <sql>
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Samuel', 'Eto''o', '+237 670112233', 'samuel@delivery.cm', 'D-12345', 'AVAILABLE', id, ST_GeomFromText('POINT(9.7 4.0)', 4326)
+            FROM vehicles WHERE license_plate = 'LT 123 AA'
+            ON CONFLICT (phone_number) DO NOTHING;
+
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Roger', 'Milla', '+237 690998877', 'roger@delivery.cm', 'D-67890', 'OFFLINE', id, ST_GeomFromText('POINT(11.5 3.8)', 4326)
+            FROM vehicles WHERE license_plate = 'CE 456 BB'
+            ON CONFLICT (phone_number) DO NOTHING;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

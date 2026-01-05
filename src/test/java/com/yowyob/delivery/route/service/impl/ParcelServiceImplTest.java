@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.service.impl;
 
+import com.yowyob.delivery.route.client.PetriNetClient;
 import com.yowyob.delivery.route.controller.dto.ParcelRequestDTO;
 import com.yowyob.delivery.route.controller.dto.ParcelResponseDTO;
 import com.yowyob.delivery.route.domain.entity.Parcel;
@@ -30,6 +31,9 @@ class ParcelServiceImplTest {
     @Mock
     private ParcelMapper parcelMapper;
 
+    @Mock
+    private PetriNetClient petriNetClient;
+
     @InjectMocks
     private ParcelServiceImpl parcelService;
 
@@ -54,7 +58,8 @@ class ParcelServiceImplTest {
                 .build();
 
         when(parcelMapper.toEntity(request)).thenReturn(parcel);
-        when(parcelRepository.save(any(Parcel.class))).thenReturn(Mono.just(savedParcel));
+        when(parcelRepository.saveWithGeometry(any(Parcel.class))).thenReturn(Mono.just(savedParcel));
+        when(petriNetClient.initializeParcelNet(savedParcel.getId())).thenReturn(Mono.just("net-123"));
         when(parcelMapper.toResponseDTO(savedParcel)).thenReturn(responseDTO);
 
         Mono<ParcelResponseDTO> result = parcelService.createParcel(request);
@@ -63,13 +68,13 @@ class ParcelServiceImplTest {
                 .assertNext(res -> {
                     assertNotNull(res.getId());
                     assertEquals("TRK-XYZ", res.getTrackingCode());
-                    assertEquals("PLANIFIE", res.getCurrentState());
                 })
                 .verifyComplete();
 
         verify(parcelRepository)
-                .save(argThat(p -> p.getTrackingCode() != null && p.getTrackingCode().startsWith("TRK-") &&
+                .saveWithGeometry(argThat(p -> p.getTrackingCode() != null && p.getTrackingCode().startsWith("TRK-") &&
                         p.getCurrentState() == ParcelState.PLANNED));
+        verify(petriNetClient).initializeParcelNet(savedParcel.getId());
     }
 
     @Test

@@ -1,0 +1,9 @@
+{
+    "senderName": "Test Sender",
+    "senderPhone": "123456789",
+    "recipientName": "Test Recipient",
+    "recipientPhone": "987654321",
+    "pickupLocation": "762ea63e-63f5-4424-9b88-617a26f37965",
+    "deliveryLocation": "8c3ff6ee-ce6c-482a-a922-8eb7855b706f",
+    "weightKg": 10.5
+}

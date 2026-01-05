@@ -1,0 +1,153 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.yowyob.delivery:route-service >------------------
+[INFO] Building Logistics Routing API 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.0:run (default-cli) > test-compile @ route-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ route-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 6 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ route-service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ route-service ---
+[INFO] skip non existing resourceDirectory F:\backend\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ route-service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:3.4.0:run (default-cli) < test-compile @ route-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.0:run (default-cli) @ route-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2026-01-05T16:40:08.440+01:00  INFO 14356 --- [route-service] [           main] c.y.delivery.route.RouteApplication      : Starting RouteApplication using Java 21.0.9 with PID 14356 (F:\backend\backend\target\classes started by USER in F:\backend\backend)
+2026-01-05T16:40:08.449+01:00  INFO 14356 --- [route-service] [           main] c.y.delivery.route.RouteApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-05T16:40:10.195+01:00  INFO 14356 --- [route-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+2026-01-05T16:40:10.759+01:00  INFO 14356 --- [route-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 543 ms. Found 6 R2DBC repository interfaces.
+2026-01-05T16:40:18.808+01:00  INFO 14356 --- [route-service] [           main] liquibase.database                       : Set default schema name to public
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.command                        : Logging exception.
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.ui                             : ERROR: Exception Details
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.ui                             : ERROR: Exception Primary Class:  ChangeLogParseException
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.ui                             : ERROR: Exception Primary Reason:  The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.ui                             : ERROR: Exception Primary Source:  4.29.2
+2026-01-05T16:40:20.625+01:00  INFO 14356 --- [route-service] [           main] liquibase.command                        : Command execution complete
+2026-01-05T16:40:20.625+01:00  WARN 14356 --- [route-service] [           main] onfigReactiveWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [org/springframework/boot/autoconfigure/liquibase/LiquibaseAutoConfiguration$LiquibaseConfiguration.class]: liquibase.exception.CommandExecutionException: liquibase.exception.ChangeLogParseException: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+2026-01-05T16:40:20.684+01:00  INFO 14356 --- [route-service] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-01-05T16:40:20.742+01:00 ERROR 14356 --- [route-service] [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [org/springframework/boot/autoconfigure/liquibase/LiquibaseAutoConfiguration$LiquibaseConfiguration.class]: liquibase.exception.CommandExecutionException: liquibase.exception.ChangeLogParseException: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1802) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:288) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1122) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1093) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1030) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987) ~[spring-context-6.2.0.jar:6.2.0]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.0.jar:6.2.0]
+	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66) ~[spring-boot-3.4.0.jar:3.4.0]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.4.0.jar:3.4.0]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.4.0.jar:3.4.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.4.0.jar:3.4.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.4.0.jar:3.4.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.4.0.jar:3.4.0]
+	at com.yowyob.delivery.route.RouteApplication.main(RouteApplication.java:13) ~[classes/:na]
+Caused by: liquibase.exception.UnexpectedLiquibaseException: liquibase.exception.CommandExecutionException: liquibase.exception.ChangeLogParseException: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:267) ~[liquibase-core-4.29.2.jar:na]
+	at org.springframework.boot.autoconfigure.liquibase.DataSourceClosingSpringLiquibase.afterPropertiesSet(DataSourceClosingSpringLiquibase.java:46) ~[spring-boot-autoconfigure-3.4.0.jar:3.4.0]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1849) ~[spring-beans-6.2.0.jar:6.2.0]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1798) ~[spring-beans-6.2.0.jar:6.2.0]
+	... 18 common frames omitted
+Caused by: liquibase.exception.CommandExecutionException: liquibase.exception.ChangeLogParseException: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.command.CommandScope.execute(CommandScope.java:258) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.lambda$update$0(Liquibase.java:216) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.runInScope(Liquibase.java:1329) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:205) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:188) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.performUpdate(SpringLiquibase.java:305) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.lambda$afterPropertiesSet$0(SpringLiquibase.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:250) ~[liquibase-core-4.29.2.jar:na]
+	... 21 common frames omitted
+Caused by: liquibase.exception.ChangeLogParseException: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.parser.core.xml.AbstractChangeLogParser.parse(AbstractChangeLogParser.java:25) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.core.helpers.DatabaseChangelogCommandStep.lambda$getDatabaseChangeLog$0(DatabaseChangelogCommandStep.java:129) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:176) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.core.helpers.DatabaseChangelogCommandStep.getDatabaseChangeLog(DatabaseChangelogCommandStep.java:128) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.core.helpers.DatabaseChangelogCommandStep.run(DatabaseChangelogCommandStep.java:87) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.CommandScope.execute(CommandScope.java:220) ~[liquibase-core-4.29.2.jar:na]
+	... 37 common frames omitted
+Caused by: liquibase.exception.SetupException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.changelog.DatabaseChangeLog.handleChildNodeHelper(DatabaseChangeLog.java:514) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.changelog.DatabaseChangeLog.handleChildNode(DatabaseChangeLog.java:466) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.changelog.DatabaseChangeLog.load(DatabaseChangeLog.java:433) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.parser.core.xml.AbstractChangeLogParser.parse(AbstractChangeLogParser.java:23) ~[liquibase-core-4.29.2.jar:na]
+	... 43 common frames omitted
+Caused by: liquibase.exception.LiquibaseException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.changelog.DatabaseChangeLog.include(DatabaseChangeLog.java:1043) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.changelog.DatabaseChangeLog.handleChildNodeHelper(DatabaseChangeLog.java:504) ~[liquibase-core-4.29.2.jar:na]
+	... 46 common frames omitted
+Caused by: liquibase.exception.ChangeLogParseException: The file src/main/resources/db/changelog/007-insert-sample-data.xml was not found in the configured search path:
+    - Spring classpath
+More locations can be added with the 'searchPath' parameter.
+	at liquibase.changelog.DatabaseChangeLog.include(DatabaseChangeLog.java:1005) ~[liquibase-core-4.29.2.jar:na]
+	... 47 common frames omitted
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19.564 s
+[INFO] Finished at: 2026-01-05T16:40:20+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.4.0:run (default-cli) on project route-service: Process terminated with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

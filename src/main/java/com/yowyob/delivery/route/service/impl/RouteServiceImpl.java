@@ -53,7 +53,7 @@ public class RouteServiceImpl implements RouteService {
                                                                 route.setParcelId(request.getParcelId());
                                                                 return route;
                                                         })
-                                                        .flatMap(routeRepository::save)
+                                                        .flatMap(routeRepository::saveWithGeometry)
                                                         .map(routeMapper::toResponseDTO);
                                 });
         }
@@ -69,7 +69,7 @@ public class RouteServiceImpl implements RouteService {
                                 .flatMap(route -> {
                                         RoutingStrategy strategy = selectStrategy(null); // Default or based on route
                                         return strategy.recalculateRoute(route, incident)
-                                                        .flatMap(routeRepository::save)
+                                                        .flatMap(routeRepository::saveWithGeometry)
                                                         .map(routeMapper::toResponseDTO);
                                 });
         }

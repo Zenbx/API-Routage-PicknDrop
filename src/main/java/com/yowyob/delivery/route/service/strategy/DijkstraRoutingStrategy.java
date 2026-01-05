@@ -38,7 +38,7 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
      */
     @Override
     public Mono<Route> calculateOptimalRoute(Hub start, Hub end, RoutingConstraintsDTO constraints) {
-        return Mono.zip(hubRepository.findAll().collectList(), connectionRepository.findAll().collectList())
+        return Mono.zip(hubRepository.findAllWithLocation().collectList(), connectionRepository.findAll().collectList())
                 .flatMap(tuple -> {
                     List<Hub> allHubs = tuple.getT1();
                     List<HubConnection> allConnections = tuple.getT2();

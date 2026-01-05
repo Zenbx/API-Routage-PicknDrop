@@ -115,7 +115,7 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
                     estimated_delivery_time, notes, created_at, updated_at
                 )
                 VALUES (
-                    :id, :tracking_code, :driver_id, :vehicle_id, :current_state, :priority,
+                    :id, :tracking_code, :driver_id, :vehicle_id, :current_state::parcel_state, :priority::parcel_priority,
                     :sender_name, :sender_phone, :recipient_name, :recipient_phone,
                     ST_GeomFromText(:pickup_location, 4326), :pickup_address,
                     ST_GeomFromText(:delivery_location, 4326), :delivery_address,
@@ -132,12 +132,14 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
             
             UUID newId = UUID.randomUUID();
             
-            return databaseClient.sql(sql)
+            DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(sql)
                     .bind("id", newId)
-                    .bind("tracking_code", parcel.getTrackingCode())
-                    .bind("driver_id", parcel.getDriverId() != null ? parcel.getDriverId() : UUID.randomUUID()) // Placeholder if null
-                    .bind("vehicle_id", parcel.getVehicleId() != null ? parcel.getVehicleId() : UUID.randomUUID())
-                    .bind("current_state", parcel.getCurrentState().name())
+                    .bind("tracking_code", parcel.getTrackingCode());
+            
+            spec = bindNullable(spec, "driver_id", parcel.getDriverId(), UUID.class);
+            spec = bindNullable(spec, "vehicle_id", parcel.getVehicleId(), UUID.class);
+            
+            spec = spec.bind("current_state", parcel.getCurrentState().name())
                     .bind("priority", parcel.getPriority().name())
                     .bind("sender_name", parcel.getSenderName())
                     .bind("sender_phone", parcel.getSenderPhone())
@@ -147,13 +149,16 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
                     .bind("pickup_address", parcel.getPickupAddress())
                     .bind("delivery_location", parcel.getDeliveryLocation())
                     .bind("delivery_address", parcel.getDeliveryAddress())
-                    .bind("weight_kg", parcel.getWeightKg())
-                    .bind("declared_value_xaf", parcel.getDeclaredValueXaf())
-                    .bind("distance_km", parcel.getDistanceKm())
-                    .bind("delivery_fee_xaf", parcel.getDeliveryFeeXaf())
-                    .bind("estimated_delivery_time", parcel.getEstimatedDeliveryTime())
-                    .bind("notes", parcel.getNotes())
-                    .map(this::mapRowToParcel)
+                    .bind("weight_kg", parcel.getWeightKg());
+
+            // Bind other nullable fields
+            spec = bindNullable(spec, "declared_value_xaf", parcel.getDeclaredValueXaf(), Double.class);
+            spec = bindNullable(spec, "distance_km", parcel.getDistanceKm(), Double.class);
+            spec = bindNullable(spec, "delivery_fee_xaf", parcel.getDeliveryFeeXaf(), Double.class);
+            spec = bindNullable(spec, "estimated_delivery_time", parcel.getEstimatedDeliveryTime(), LocalDateTime.class);
+            spec = bindNullable(spec, "notes", parcel.getNotes(), String.class);
+
+            return spec.map(this::mapRowToParcel)
                     .one()
                     .doOnSuccess(saved -> log.info("Parcel created with ID: {}", saved.getId()))
                     .doOnError(e -> log.error("Error saving parcel", e));
@@ -164,8 +169,8 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
                 SET tracking_code = :tracking_code,
                     driver_id = :driver_id,
                     vehicle_id = :vehicle_id,
-                    current_state = :current_state,
-                    priority = :priority,
+                    current_state = :current_state::parcel_state,
+                    priority = :priority::parcel_priority,
                     sender_name = :sender_name,
                     sender_phone = :sender_phone,
                     recipient_name = :recipient_name,
@@ -190,12 +195,14 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
                     estimated_delivery_time, notes, created_at, updated_at
                 """;
             
-            return databaseClient.sql(sql)
+            DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(sql)
                     .bind("id", parcel.getId())
-                    .bind("tracking_code", parcel.getTrackingCode())
-                    .bind("driver_id", parcel.getDriverId())
-                    .bind("vehicle_id", parcel.getVehicleId())
-                    .bind("current_state", parcel.getCurrentState().name())
+                    .bind("tracking_code", parcel.getTrackingCode());
+
+            spec = bindNullable(spec, "driver_id", parcel.getDriverId(), UUID.class);
+            spec = bindNullable(spec, "vehicle_id", parcel.getVehicleId(), UUID.class);
+
+            spec = spec.bind("current_state", parcel.getCurrentState().name())
                     .bind("priority", parcel.getPriority().name())
                     .bind("sender_name", parcel.getSenderName())
                     .bind("sender_phone", parcel.getSenderPhone())
@@ -204,17 +211,32 @@ public class CustomParcelRepositoryImpl implements CustomParcelRepository {
                     .bind("pickup_location", parcel.getPickupLocation())
                     .bind("pickup_address", parcel.getPickupAddress())
                     .bind("delivery_location", parcel.getDeliveryLocation())
-                    .bind("delivery_address", parcel.getDeliveryAddress())
-                    .bind("weight_kg", parcel.getWeightKg())
-                    .bind("declared_value_xaf", parcel.getDeclaredValueXaf())
-                    .bind("distance_km", parcel.getDistanceKm())
-                    .bind("delivery_fee_xaf", parcel.getDeliveryFeeXaf())
-                    .bind("estimated_delivery_time", parcel.getEstimatedDeliveryTime())
-                    .bind("notes", parcel.getNotes())
-                    .map(this::mapRowToParcel)
+                    .bind("delivery_address", parcel.getDeliveryAddress());
+
+            spec = bindNullable(spec, "weight_kg", parcel.getWeightKg(), Double.class);
+            spec = bindNullable(spec, "declared_value_xaf", parcel.getDeclaredValueXaf(), Double.class);
+            spec = bindNullable(spec, "distance_km", parcel.getDistanceKm(), Double.class);
+            spec = bindNullable(spec, "delivery_fee_xaf", parcel.getDeliveryFeeXaf(), Double.class);
+            spec = bindNullable(spec, "estimated_delivery_time", parcel.getEstimatedDeliveryTime(), LocalDateTime.class);
+            spec = bindNullable(spec, "notes", parcel.getNotes(), String.class);
+            
+            return spec.map(this::mapRowToParcel)
                     .one()
                     .doOnSuccess(saved -> log.info("Parcel updated with ID: {}", saved.getId()))
                     .doOnError(e -> log.error("Error updating parcel {}", parcel.getId(), e));
+        }
+    }
+
+    /**
+     * Helper method to bind nullable fields.
+     * If the value is null, it binds a null value of the specified type.
+     */
+    private <T> DatabaseClient.GenericExecuteSpec bindNullable(
+            DatabaseClient.GenericExecuteSpec spec, String name, T value, Class<T> type) {
+        if (value != null) {
+            return spec.bind(name, value);
+        } else {
+            return spec.bindNull(name, type);
         }
     }
 

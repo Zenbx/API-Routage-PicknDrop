@@ -9,5 +9,5 @@ import java.util.UUID;
  * Reactive repository for {@link Route} entities.
  */
 @Repository
-public interface RouteRepository extends R2dbcRepository<Route, UUID> {
+public interface RouteRepository extends R2dbcRepository<Route, UUID>, CustomRouteRepository {
 }
