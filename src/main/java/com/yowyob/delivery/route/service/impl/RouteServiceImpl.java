@@ -11,6 +11,7 @@ import com.yowyob.delivery.route.service.RouteService;
 import com.yowyob.delivery.route.service.strategy.AStarRoutingStrategy;
 import com.yowyob.delivery.route.service.strategy.BasicRoutingStrategy;
 import com.yowyob.delivery.route.service.strategy.DijkstraRoutingStrategy;
+import com.yowyob.delivery.route.service.strategy.OsrmRoutingStrategy;
 import com.yowyob.delivery.route.service.strategy.RoutingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,17 @@ public class RouteServiceImpl implements RouteService {
 
                                         RoutingStrategy strategy = selectStrategy(request.getConstraints());
                                         return strategy.calculateOptimalRoute(start, end, request.getConstraints())
+                                                        .onErrorResume(e -> {
+                                                                // Fallback to OSRM if primary strategy fails (e.g. No
+                                                                // Path Found in Dijkstra)
+                                                                return routingStrategies.stream()
+                                                                                .filter(s -> s instanceof OsrmRoutingStrategy)
+                                                                                .findFirst()
+                                                                                .map(osrm -> osrm.calculateOptimalRoute(
+                                                                                                start, end,
+                                                                                                request.getConstraints()))
+                                                                                .orElse(Mono.error(e));
+                                                        })
                                                         .map(route -> {
                                                                 route.setParcelId(request.getParcelId());
                                                                 route.setStartHubId(start.getId());
@@ -97,13 +109,18 @@ public class RouteServiceImpl implements RouteService {
                         case "ASTAR" -> routingStrategies.stream()
                                         .filter(s -> s instanceof AStarRoutingStrategy)
                                         .findFirst();
-                        default -> routingStrategies.stream()
+                        case "BASIC" -> routingStrategies.stream()
                                         .filter(s -> s instanceof BasicRoutingStrategy)
                                         .findFirst();
+                        default -> routingStrategies.stream()
+                                        .filter(s -> s instanceof OsrmRoutingStrategy)
+                                        .findFirst().or(() -> routingStrategies.stream()
+                                                        .filter(s -> s instanceof BasicRoutingStrategy)
+                                                        .findFirst());
                 };
 
-                return strategy.orElseThrow(() ->
-                        new IllegalArgumentException("No routing strategy found for algorithm: " + algo));
+                return strategy.orElseThrow(
+                                () -> new IllegalArgumentException("No routing strategy found for algorithm: " + algo));
         }
 
         /**

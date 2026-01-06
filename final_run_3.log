@@ -1,0 +1,75 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.yowyob.delivery:route-service >------------------
+[INFO] Building Logistics Routing API 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.0:run (default-cli) > test-compile @ route-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ route-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 10 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ route-service ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 67 source files with javac [debug release 17] to target\classes
+[WARNING] Implicitly compiled files were not subject to annotation processing.
+  Use -implicit to specify a policy for implicit compilation.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ route-service ---
+[INFO] Not copying test resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ route-service ---
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] <<< spring-boot:3.4.0:run (default-cli) < test-compile @ route-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.0:run (default-cli) @ route-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.0)
+
+2026-01-06T22:18:01.754+01:00  INFO 40820 --- [route-service] [           main] c.y.delivery.route.RouteApplication      : Starting RouteApplication using Java 21.0.9 with PID 40820 (F:\backend\backend\target\classes started by USER in F:\backend\backend)
+2026-01-06T22:18:01.756+01:00  INFO 40820 --- [route-service] [           main] c.y.delivery.route.RouteApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-01-06T22:18:02.575+01:00  INFO 40820 --- [route-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+2026-01-06T22:18:02.737+01:00  INFO 40820 --- [route-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 156 ms. Found 6 R2DBC repository interfaces.
+2026-01-06T22:18:02.739+01:00  WARN 40820 --- [route-service] [           main] onfigReactiveWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.support.BeanDefinitionOverrideException: Invalid bean definition with name 'r2dbcCustomConversions' defined in class path resource [com/yowyob/delivery/route/config/R2dbcConfiguration.class]: Cannot register bean definition [Root bean: class=null; scope=; abstract=false; lazyInit=null; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; fallback=false; factoryBeanName=r2dbcConfiguration; factoryMethodName=r2dbcCustomConversions; initMethodNames=null; destroyMethodNames=[(inferred)]; defined in class path resource [com/yowyob/delivery/route/config/R2dbcConfiguration.class]] for bean 'r2dbcCustomConversions' since there is already [Root bean: class=null; scope=; abstract=false; lazyInit=null; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; fallback=false; factoryBeanName=r2dbcConfig; factoryMethodName=r2dbcCustomConversions; initMethodNames=null; destroyMethodNames=[(inferred)]; defined in class path resource [com/yowyob/delivery/route/config/R2dbcConfig.class]] bound.
+2026-01-06T22:18:02.771+01:00  INFO 40820 --- [route-service] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-01-06T22:18:02.806+01:00 ERROR 40820 --- [route-service] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The bean 'r2dbcCustomConversions', defined in class path resource [com/yowyob/delivery/route/config/R2dbcConfiguration.class], could not be registered. A bean with that name has already been defined in class path resource [com/yowyob/delivery/route/config/R2dbcConfig.class] and overriding is disabled.
+
+Action:
+
+Consider renaming one of the beans or enabling overriding by setting spring.main.allow-bean-definition-overriding=true
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  13.902 s
+[INFO] Finished at: 2026-01-06T22:18:02+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.4.0:run (default-cli) on project route-service: Process terminated with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
