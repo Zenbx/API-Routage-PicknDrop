@@ -40,6 +40,18 @@ public class Route {
     private UUID driverId;
 
     /**
+     * ID of the starting hub.
+     */
+    @Column("start_hub_id")
+    private UUID startHubId;
+
+    /**
+     * ID of the destination hub.
+     */
+    @Column("end_hub_id")
+    private UUID endHubId;
+
+    /**
      * Path geometry of the route, stored as a Well-Known Text (WKT) LineString.
      */
     @Column("route_geometry")

@@ -29,8 +29,10 @@ class RouteControllerTest {
     @Test
     void shouldCalculateRoute() {
         RouteCalculationRequestDTO request = new RouteCalculationRequestDTO();
+        request.setParcelId(UUID.randomUUID());
         request.setStartHubId(UUID.randomUUID());
         request.setEndHubId(UUID.randomUUID());
+        request.setDriverId(UUID.randomUUID());
 
         RouteResponseDTO responseDTO = new RouteResponseDTO();
         responseDTO.setTotalDistanceKm(20.0);
@@ -84,8 +86,10 @@ class RouteControllerTest {
     @Test
     void shouldReturn422WhenNoPathFound() {
         RouteCalculationRequestDTO request = new RouteCalculationRequestDTO();
+        request.setParcelId(UUID.randomUUID());
         request.setStartHubId(UUID.randomUUID());
         request.setEndHubId(UUID.randomUUID());
+        request.setDriverId(UUID.randomUUID());
 
         when(routeService.calculateRoute(any())).thenReturn(Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found")));
 

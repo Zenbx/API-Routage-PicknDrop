@@ -51,6 +51,8 @@ public class RouteServiceImpl implements RouteService {
                                         return strategy.calculateOptimalRoute(start, end, request.getConstraints())
                                                         .map(route -> {
                                                                 route.setParcelId(request.getParcelId());
+                                                                route.setStartHubId(start.getId());
+                                                                route.setEndHubId(end.getId());
                                                                 return route;
                                                         })
                                                         .flatMap(routeRepository::saveWithGeometry)
@@ -81,26 +83,27 @@ public class RouteServiceImpl implements RouteService {
          * @param constraints the routing constraints (e.g., preference for DIJKSTRA or
          *                    ASTAR)
          * @return the selected routing strategy implementation
+         * @throws IllegalArgumentException if no matching strategy is found
          */
         private RoutingStrategy selectStrategy(RoutingConstraintsDTO constraints) {
                 String algo = (constraints != null && constraints.getAlgorithm() != null)
                                 ? constraints.getAlgorithm().toUpperCase()
                                 : "BASIC";
 
-                return switch (algo) {
+                var strategy = switch (algo) {
                         case "DIJKSTRA" -> routingStrategies.stream()
                                         .filter(s -> s instanceof DijkstraRoutingStrategy)
-                                        .findFirst()
-                                        .orElseThrow();
+                                        .findFirst();
                         case "ASTAR" -> routingStrategies.stream()
                                         .filter(s -> s instanceof AStarRoutingStrategy)
-                                        .findFirst()
-                                        .orElseThrow();
+                                        .findFirst();
                         default -> routingStrategies.stream()
                                         .filter(s -> s instanceof BasicRoutingStrategy)
-                                        .findFirst()
-                                        .orElseThrow();
+                                        .findFirst();
                 };
+
+                return strategy.orElseThrow(() ->
+                        new IllegalArgumentException("No routing strategy found for algorithm: " + algo));
         }
 
         /**

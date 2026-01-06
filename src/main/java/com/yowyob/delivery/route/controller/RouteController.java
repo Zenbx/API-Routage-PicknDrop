@@ -36,7 +36,28 @@ public class RouteController {
     @Operation(summary = "Calculate optimal route", description = "Performs a pathfinding algorithm to find the best route between two points based on distance, time, and constraints.")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<RouteResponseDTO> calculateRoute(@Valid @RequestBody RouteCalculationRequestDTO request) {
-        return routeService.calculateRoute(request);
+        // Validate request parameters early (fail-fast)
+        if (request.getParcelId() == null) {
+            return Mono.error(new IllegalArgumentException("parcelId must not be null"));
+        }
+        if (request.getStartHubId() == null) {
+            return Mono.error(new IllegalArgumentException("startHubId must not be null"));
+        }
+        if (request.getEndHubId() == null) {
+            return Mono.error(new IllegalArgumentException("endHubId must not be null"));
+        }
+        if (request.getDriverId() == null) {
+            return Mono.error(new IllegalArgumentException("driverId must not be null"));
+        }
+        
+        // Call service and ensure proper error handling
+        return routeService.calculateRoute(request)
+                .doOnError(error -> {
+                    // Log any errors that occur during calculation or persistence
+                    if (!(error instanceof IllegalArgumentException)) {
+                        error.printStackTrace();
+                    }
+                });
     }
 
     /**

@@ -31,6 +31,7 @@ class DeliveryControllerTest {
         request.setParcelId(UUID.randomUUID());
         request.setStartHubId(UUID.randomUUID());
         request.setEndHubId(UUID.randomUUID());
+        request.setDriverId(UUID.randomUUID());
 
         RouteResponseDTO responseDTO = new RouteResponseDTO();
         responseDTO.setId(UUID.randomUUID());

@@ -47,4 +47,22 @@ public class EnumConverters {
             return ParcelPriority.valueOf(source.toUpperCase());
         }
     }
+
+    // ========== DriverState Converters ==========
+
+    @WritingConverter
+    public static class DriverStateToStringConverter implements Converter<com.yowyob.delivery.route.domain.enums.DriverState, String> {
+        @Override
+        public String convert(@NonNull com.yowyob.delivery.route.domain.enums.DriverState source) {
+            return source.name();
+        }
+    }
+
+    @ReadingConverter
+    public static class StringToDriverStateConverter implements Converter<String, com.yowyob.delivery.route.domain.enums.DriverState> {
+        @Override
+        public com.yowyob.delivery.route.domain.enums.DriverState convert(@NonNull String source) {
+            return com.yowyob.delivery.route.domain.enums.DriverState.valueOf(source.toUpperCase());
+        }
+    }
 }

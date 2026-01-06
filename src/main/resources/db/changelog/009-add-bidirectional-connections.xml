@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-bidirectional-connections-v1" author="antigravity">
+        <comment>Make hub connections bidirectional by inserting reverse edges (idempotent)</comment>
+        <sql>
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 240.5
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Douala%' AND h2.address LIKE 'Yaoundé%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 290.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Bafoussam%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 180.2
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Kribi%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+
+            INSERT INTO hub_connections (id, from_hub_id, to_hub_id, weight)
+            SELECT gen_random_uuid(), h2.id, h1.id, 1100.0
+            FROM hubs h1, hubs h2
+            WHERE h1.address LIKE 'Yaoundé%' AND h1.id != h2.id AND h2.address LIKE 'Garoua%'
+            ON CONFLICT ON CONSTRAINT uk_hub_connections_from_to DO NOTHING;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

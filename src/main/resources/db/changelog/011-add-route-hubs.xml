@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-route-hubs" author="antigravity">
+        <comment>Adding start and end hub references to routes for recalculation</comment>
+        
+        <addColumn tableName="routes">
+            <column name="start_hub_id" type="UUID"/>
+            <column name="end_hub_id" type="UUID"/>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="routes"
+                baseColumnNames="start_hub_id"
+                constraintName="fk_routes_start_hub"
+                referencedTableName="hubs"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+
+        <addForeignKeyConstraint
+                baseTableName="routes"
+                baseColumnNames="end_hub_id"
+                constraintName="fk_routes_end_hub"
+                referencedTableName="hubs"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+                
+        <createIndex tableName="routes" indexName="idx_routes_start_hub">
+            <column name="start_hub_id"/>
+        </createIndex>
+        <createIndex tableName="routes" indexName="idx_routes_end_hub">
+            <column name="end_hub_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

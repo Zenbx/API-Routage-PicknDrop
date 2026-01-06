@@ -24,6 +24,7 @@ public class RouteCalculationRequestDTO {
     /**
      * The unique identifier of the parcel for which the route is being calculated.
      */
+    @NotNull(message = "Parcel ID is required")
     @Schema(description = "ID of the parcel to be delivered", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID parcelId;
 
@@ -47,4 +48,10 @@ public class RouteCalculationRequestDTO {
      */
     @Schema(description = "Optional preferences and constraints for the routing algorithm")
     private RoutingConstraintsDTO constraints;
+
+    /**
+     * The unique identifier of the driver assigned to this route.
+     */
+    @Schema(description = "ID of the driver assigned to this delivery", example = "d1e2f3g4-h5i6-j7k8-l9m0-n1o2p3q4r5s6")
+    private UUID driverId;
 }

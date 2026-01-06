@@ -65,7 +65,8 @@ public class ParcelServiceImpl implements ParcelService {
             return parcelRepository.saveWithGeometry(parcel)
                     .flatMap(savedParcel -> 
                         petriNetClient.initializeParcelNet(savedParcel.getId())
-                            .onErrorResume(e -> Mono.just("FAILED_TO_INIT_NET"))
+                            .map(netId -> savedParcel) // If successful, return saved parcel
+                            // Use map to transform result, but if it fails, the error will propagate
                             .thenReturn(parcelMapper.toResponseDTO(savedParcel))
                     );
         });

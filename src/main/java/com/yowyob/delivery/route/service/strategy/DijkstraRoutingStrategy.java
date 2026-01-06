@@ -136,10 +136,34 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
 
     /**
      * {@inheritDoc}
+     * Recalculates the route using the stored start and end hubs.
+     * In a real scenario, this would likely take the incident into account to adjust weights
+     * or exclude certain paths.
      */
     @Override
     public Mono<Route> recalculateRoute(Route currentRoute, Object incident) {
-        return Mono.just(currentRoute);
+        if (currentRoute.getStartHubId() == null || currentRoute.getEndHubId() == null) {
+            // Fallback for legacy routes without stored hubs
+            return Mono.just(currentRoute);
+        }
+        
+        return Mono.zip(
+            hubRepository.findById(currentRoute.getStartHubId()),
+            hubRepository.findById(currentRoute.getEndHubId())
+        ).flatMap(tuple -> {
+             // In a real implementation with incidents, we would modify constraints here
+             return calculateOptimalRoute(tuple.getT1(), tuple.getT2(), null)
+                 .map(newRoute -> {
+                     newRoute.setId(currentRoute.getId()); // Keep same ID
+                     newRoute.setParcelId(currentRoute.getParcelId());
+                     newRoute.setDriverId(currentRoute.getDriverId());
+                     newRoute.setStartHubId(currentRoute.getStartHubId());
+                     newRoute.setEndHubId(currentRoute.getEndHubId());
+                     newRoute.setCreatedAt(currentRoute.getCreatedAt());
+                     // Mark old route as inactive if we were creating a new one, but here we update in place
+                     return newRoute;
+                 });
+        });
     }
 
     /**

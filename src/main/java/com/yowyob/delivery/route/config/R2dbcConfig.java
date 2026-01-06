@@ -27,6 +27,8 @@ public class R2dbcConfig {
                     new EnumConverters.StringToParcelStateConverter(),
                     new EnumConverters.ParcelPriorityToStringConverter(),
                     new EnumConverters.StringToParcelPriorityConverter(),
+                    new EnumConverters.DriverStateToStringConverter(),
+                    new EnumConverters.StringToDriverStateConverter(),
                     new GeometryConverters.JtsPointToStringConverter(),
                     new GeometryConverters.StringToJtsPointConverter()
                 )

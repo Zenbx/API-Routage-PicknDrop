@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-more-drivers" author="antigravity">
+        <comment>Seeding additional drivers for simulation</comment>
+
+        <!-- New Vehicles for the drivers -->
+        <sql>
+            INSERT INTO vehicles (id, license_plate, vehicle_type, brand, model, manufacture_year, max_capacity_kg, cargo_volume_m3) VALUES
+            (gen_random_uuid(), 'LT 999 TR', 'TRUCK', 'Volvo', 'FH16', 2021, 20000.0, 50.0),
+            (gen_random_uuid(), 'LT 888 VN', 'VAN', 'Ford', 'Transit', 2022, 1500.0, 8.0),
+            (gen_random_uuid(), 'CE 777 MT', 'MOTORCYCLE', 'Yamaha', 'Crux', 2023, 100.0, 0.3),
+            (gen_random_uuid(), 'OU 555 CR', 'CAR', 'Toyota', 'Yaris', 2020, 400.0, 1.5),
+            (gen_random_uuid(), 'NO 222 BK', 'BICYCLE', 'Giant', 'Cargo', 2024, 50.0, 0.2)
+            ON CONFLICT (license_plate) DO NOTHING;
+        </sql>
+
+        <!-- Drivers linked to vehicles (querying UUIDs dynamically to avoid hardcoding issues if vehicle exist) -->
+        <sql>
+            -- Driver 1 (Truck in Douala)
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Jean', 'Makoun', '+237 611111111', 'jean.m@delivery.cm', 'DL-001', 'AVAILABLE', id, ST_GeomFromText('POINT(9.7085 4.0503)', 4326)
+            FROM vehicles WHERE license_plate = 'LT 999 TR'
+            ON CONFLICT (phone_number) DO NOTHING;
+
+            -- Driver 2 (Van in Yaoundé)
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Marc-Vivien', 'Foe', '+237 622222222', 'marc.f@delivery.cm', 'DL-002', 'AVAILABLE', id, ST_GeomFromText('POINT(11.5021 3.8480)', 4326)
+            FROM vehicles WHERE license_plate = 'LT 888 VN'
+            ON CONFLICT (phone_number) DO NOTHING;
+
+            -- Driver 3 (Moto in Douala)
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Patrick', 'Mboma', '+237 633333333', 'patrick.m@delivery.cm', 'DL-003', 'AVAILABLE', id, ST_GeomFromText('POINT(9.7185 4.0603)', 4326)
+            FROM vehicles WHERE license_plate = 'CE 777 MT'
+            ON CONFLICT (phone_number) DO NOTHING;
+
+            -- Driver 4 (Car in Bafoussam)
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Rigobert', 'Song', '+237 644444444', 'rigo.s@delivery.cm', 'DL-004', 'AVAILABLE', id, ST_GeomFromText('POINT(10.4167 5.4833)', 4326)
+            FROM vehicles WHERE license_plate = 'OU 555 CR'
+            ON CONFLICT (phone_number) DO NOTHING;
+            
+            -- Driver 5 (Bicycle in Kribi)
+            INSERT INTO drivers (id, first_name, last_name, phone_number, email, license_number, current_state, vehicle_id, current_location)
+            SELECT gen_random_uuid(), 'Geremi', 'Njitap', '+237 655555555', 'geremi.n@delivery.cm', 'DL-005', 'AVAILABLE', id, ST_GeomFromText('POINT(9.9083 2.9506)', 4326)
+            FROM vehicles WHERE license_plate = 'NO 222 BK'
+            ON CONFLICT (phone_number) DO NOTHING;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

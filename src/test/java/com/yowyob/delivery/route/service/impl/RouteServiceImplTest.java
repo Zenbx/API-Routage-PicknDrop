@@ -53,6 +53,7 @@ class RouteServiceImplTest {
         UUID startHubId = UUID.randomUUID();
         UUID endHubId = UUID.randomUUID();
         UUID parcelId = UUID.randomUUID();
+        UUID driverId = UUID.randomUUID();
         Hub startHub = Hub.builder().id(startHubId).build();
         Hub endHub = Hub.builder().id(endHubId).build();
         Route route = Route.builder().id(UUID.randomUUID()).build();
@@ -62,6 +63,7 @@ class RouteServiceImplTest {
         request.setStartHubId(startHubId);
         request.setEndHubId(endHubId);
         request.setParcelId(parcelId);
+        request.setDriverId(driverId);
 
         when(hubRepository.findById(startHubId)).thenReturn(Mono.just(startHub));
         when(hubRepository.findById(endHubId)).thenReturn(Mono.just(endHub));
@@ -84,6 +86,7 @@ class RouteServiceImplTest {
         UUID startHubId = UUID.randomUUID();
         UUID endHubId = UUID.randomUUID();
         UUID parcelId = UUID.randomUUID();
+        UUID driverId = UUID.randomUUID();
         Hub startHub = Hub.builder().id(startHubId).build();
         Hub endHub = Hub.builder().id(endHubId).build();
         Route route = Route.builder().id(UUID.randomUUID()).build();
@@ -96,6 +99,7 @@ class RouteServiceImplTest {
         request.setStartHubId(startHubId);
         request.setEndHubId(endHubId);
         request.setParcelId(parcelId);
+        request.setDriverId(driverId);
         request.setConstraints(constraints);
 
         when(hubRepository.findById(startHubId)).thenReturn(Mono.just(startHub));

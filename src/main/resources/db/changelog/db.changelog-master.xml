@@ -480,4 +480,7 @@
 
     <include file="db/changelog/007-insert-sample-data.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/008-fix-route-constraints.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/009-add-bidirectional-connections.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/010-insert-drivers.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/011-add-route-hubs.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
