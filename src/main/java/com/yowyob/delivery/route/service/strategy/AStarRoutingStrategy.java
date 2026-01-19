@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.service.strategy;
 
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RoutingConstraintsDTO;
 import com.yowyob.delivery.route.domain.entity.Hub;
 import com.yowyob.delivery.route.domain.entity.HubConnection;
@@ -140,10 +141,32 @@ public class AStarRoutingStrategy implements RoutingStrategy {
 
     /**
      * {@inheritDoc}
+     * Recalculates the route using A* algorithm with the stored start and end hubs.
      */
     @Override
-    public Mono<Route> recalculateRoute(Route currentRoute, Object incident) {
-        return Mono.just(currentRoute);
+    public Mono<Route> recalculateRoute(Route currentRoute, IncidentDTO incident) {
+        if (currentRoute.getStartHubId() == null || currentRoute.getEndHubId() == null) {
+            // Fallback for legacy routes without stored hubs
+            return Mono.just(currentRoute);
+        }
+
+        return Mono.zip(
+            hubRepository.findById(currentRoute.getStartHubId()),
+            hubRepository.findById(currentRoute.getEndHubId())
+        ).flatMap(tuple -> {
+             // Recalculate using A* - the heuristic will naturally find alternative paths
+             return calculateOptimalRoute(tuple.getT1(), tuple.getT2(), null)
+                 .map(newRoute -> {
+                     newRoute.setId(currentRoute.getId());
+                     newRoute.setParcelId(currentRoute.getParcelId());
+                     newRoute.setDriverId(currentRoute.getDriverId());
+                     newRoute.setStartHubId(currentRoute.getStartHubId());
+                     newRoute.setEndHubId(currentRoute.getEndHubId());
+                     newRoute.setCreatedAt(currentRoute.getCreatedAt());
+                     newRoute.setRoutingService("ASTAR_RECALC"); // Mark as recalculated
+                     return newRoute;
+                 });
+        });
     }
 
     /**

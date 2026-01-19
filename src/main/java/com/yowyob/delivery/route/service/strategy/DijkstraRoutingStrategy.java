@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.service.strategy;
 
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RoutingConstraintsDTO;
 import com.yowyob.delivery.route.domain.entity.Hub;
 import com.yowyob.delivery.route.domain.entity.HubConnection;
@@ -12,6 +13,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.WKTReader;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +32,7 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
     private final HubRepository hubRepository;
     private final HubMapper hubMapper;
     private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final WKTReader wktReader = new WKTReader();
 
     /**
      * {@inheritDoc}
@@ -38,10 +41,56 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
      */
     @Override
     public Mono<Route> calculateOptimalRoute(Hub start, Hub end, RoutingConstraintsDTO constraints) {
+        return calculateRouteWithExclusions(start, end, null);
+    }
+
+    private Mono<Route> calculateRouteWithExclusions(Hub start, Hub end, IncidentDTO incident) {
         return Mono.zip(hubRepository.findAllWithLocation().collectList(), connectionRepository.findAll().collectList())
                 .flatMap(tuple -> {
-                    List<Hub> allHubs = tuple.getT1();
-                    List<HubConnection> allConnections = tuple.getT2();
+                    List<Hub> allHubsOriginal = tuple.getT1();
+                    List<HubConnection> allConnectionsOriginal = tuple.getT2();
+
+                    final List<Hub> allHubs;
+                    final List<HubConnection> allConnections;
+
+                    // Filter hubs and connections if there's an incident
+                    if (incident != null) {
+                        allHubs = allHubsOriginal.stream()
+                                .filter(h -> h.getId().equals(start.getId()) || h.getId().equals(end.getId()) ||
+                                        !GeometryUtils.isHubInIncidentBuffer(h, incident, wktReader))
+                                .toList();
+
+                        Set<UUID> validHubIds = new HashSet<>();
+                        allHubs.forEach(h -> validHubIds.add(h.getId()));
+
+                        allConnections = allConnectionsOriginal.stream()
+                                .filter(c -> {
+                                    if (!validHubIds.contains(c.getFromHubId())
+                                            || !validHubIds.contains(c.getToHubId())) {
+                                        return false;
+                                    }
+                                    // Also check if the connection line itself intersects the incident
+                                    Hub from = allHubs.stream().filter(h -> h.getId().equals(c.getFromHubId()))
+                                            .findFirst().orElse(null);
+                                    Hub to = allHubs.stream().filter(h -> h.getId().equals(c.getToHubId())).findFirst()
+                                            .orElse(null);
+                                    if (from != null && to != null) {
+                                        try {
+                                            Point p1 = (Point) wktReader.read(from.getLocation());
+                                            Point p2 = (Point) wktReader.read(to.getLocation());
+                                            return !GeometryUtils.doesRouteIntersectIncident(p1.getY(), p1.getX(),
+                                                    p2.getY(), p2.getX(), incident);
+                                        } catch (Exception e) {
+                                            return true;
+                                        }
+                                    }
+                                    return true;
+                                })
+                                .toList();
+                    } else {
+                        allHubs = allHubsOriginal;
+                        allConnections = allConnectionsOriginal;
+                    }
 
                     Map<UUID, Double> distances = new HashMap<>();
                     Map<UUID, UUID> previous = new HashMap<>();
@@ -60,7 +109,8 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
 
                         // Consider both directions so the graph behaves as undirected when appropriate
                         allConnections.stream()
-                                .filter(c -> c.getFromHubId().equals(current.getId()) || c.getToHubId().equals(current.getId()))
+                                .filter(c -> c.getFromHubId().equals(current.getId())
+                                        || c.getToHubId().equals(current.getId()))
                                 .forEach(connection -> {
                                     UUID neighborId;
                                     if (connection.getFromHubId().equals(current.getId())) {
@@ -100,7 +150,8 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
     private Mono<Route> buildRouteFromPath(Hub start, Hub end, Map<UUID, UUID> previous, Double totalDistance,
             List<Hub> allHubs) {
         if (!previous.containsKey(end.getId()) && !start.getId().equals(end.getId())) {
-            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found between hubs"));
+            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException(
+                    "No path found between hubs"));
         }
 
         List<Coordinate> coordinates = new ArrayList<>();
@@ -114,10 +165,12 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
         }
 
         if (coordinates.isEmpty()) {
-            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException("No path found between hubs"));
+            return Mono.error(new com.yowyob.delivery.route.controller.exception.NoPathFoundException(
+                    "No path found between hubs"));
         }
 
-        // JTS LineString requires at least 2 points. If start == end we duplicate the coordinate.
+        // JTS LineString requires at least 2 points. If start == end we duplicate the
+        // coordinate.
         if (coordinates.size() == 1) {
             Coordinate c = coordinates.get(0);
             coordinates.add(new Coordinate(c.x, c.y));
@@ -137,33 +190,31 @@ public class DijkstraRoutingStrategy implements RoutingStrategy {
     /**
      * {@inheritDoc}
      * Recalculates the route using the stored start and end hubs.
-     * In a real scenario, this would likely take the incident into account to adjust weights
-     * or exclude certain paths.
+     * Takes incident into account by recalculating the path and marking it as
+     * recalculated.
      */
     @Override
-    public Mono<Route> recalculateRoute(Route currentRoute, Object incident) {
+    public Mono<Route> recalculateRoute(Route currentRoute, IncidentDTO incident) {
         if (currentRoute.getStartHubId() == null || currentRoute.getEndHubId() == null) {
             // Fallback for legacy routes without stored hubs
             return Mono.just(currentRoute);
         }
-        
+
         return Mono.zip(
-            hubRepository.findById(currentRoute.getStartHubId()),
-            hubRepository.findById(currentRoute.getEndHubId())
-        ).flatMap(tuple -> {
-             // In a real implementation with incidents, we would modify constraints here
-             return calculateOptimalRoute(tuple.getT1(), tuple.getT2(), null)
-                 .map(newRoute -> {
-                     newRoute.setId(currentRoute.getId()); // Keep same ID
-                     newRoute.setParcelId(currentRoute.getParcelId());
-                     newRoute.setDriverId(currentRoute.getDriverId());
-                     newRoute.setStartHubId(currentRoute.getStartHubId());
-                     newRoute.setEndHubId(currentRoute.getEndHubId());
-                     newRoute.setCreatedAt(currentRoute.getCreatedAt());
-                     // Mark old route as inactive if we were creating a new one, but here we update in place
-                     return newRoute;
-                 });
-        });
+                hubRepository.findById(currentRoute.getStartHubId()),
+                hubRepository.findById(currentRoute.getEndHubId())).flatMap(tuple -> {
+                    return calculateRouteWithExclusions(tuple.getT1(), tuple.getT2(), incident)
+                            .map(newRoute -> {
+                                newRoute.setId(currentRoute.getId()); // Keep same ID
+                                newRoute.setParcelId(currentRoute.getParcelId());
+                                newRoute.setDriverId(currentRoute.getDriverId());
+                                newRoute.setStartHubId(currentRoute.getStartHubId());
+                                newRoute.setEndHubId(currentRoute.getEndHubId());
+                                newRoute.setCreatedAt(currentRoute.getCreatedAt());
+                                newRoute.setRoutingService("DIJKSTRA_RECALC"); // Mark as recalculated
+                                return newRoute;
+                            });
+                });
     }
 
     /**

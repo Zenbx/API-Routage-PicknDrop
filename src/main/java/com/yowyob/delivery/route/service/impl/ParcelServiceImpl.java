@@ -38,43 +38,46 @@ public class ParcelServiceImpl implements ParcelService {
     @Override
     public Mono<ParcelResponseDTO> createParcel(ParcelRequestDTO request) {
         return Mono.zip(
-            resolveLocation(request.getPickupLocation()),
-            resolveLocation(request.getDeliveryLocation())
-        ).flatMap(locations -> {
-            Parcel parcel = parcelMapper.toEntity(request);
-            
-            // Set resolved coordinates and addresses
-            parcel.setPickupLocation(locations.getT1().location);
-            if (parcel.getPickupAddress() == null || parcel.getPickupAddress().isEmpty() || parcel.getPickupAddress().equals("Address not specified")) {
-                parcel.setPickupAddress(locations.getT1().address);
-            }
-            
-            parcel.setDeliveryLocation(locations.getT2().location);
-            if (parcel.getDeliveryAddress() == null || parcel.getDeliveryAddress().isEmpty() || parcel.getDeliveryAddress().equals("Address not specified")) {
-                parcel.setDeliveryAddress(locations.getT2().address);
-            }
+                resolveLocation(request.getPickupLocation()),
+                resolveLocation(request.getDeliveryLocation())).flatMap(locations -> {
+                    Parcel parcel = parcelMapper.toEntity(request);
 
-            parcel.setTrackingCode("TRK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-            parcel.setCurrentState(ParcelState.PLANNED);
-            parcel.setPriority(com.yowyob.delivery.route.domain.enums.ParcelPriority.NORMAL);
+                    // Set resolved coordinates and addresses
+                    parcel.setPickupLocation(locations.getT1().location);
+                    if (parcel.getPickupAddress() == null || parcel.getPickupAddress().isEmpty()
+                            || parcel.getPickupAddress().equals("Address not specified")) {
+                        parcel.setPickupAddress(locations.getT1().address);
+                    }
 
-            if (parcel.getDeliveryFeeXaf() == null) {
-                parcel.setDeliveryFeeXaf(0.0);
-            }
+                    parcel.setDeliveryLocation(locations.getT2().location);
+                    if (parcel.getDeliveryAddress() == null || parcel.getDeliveryAddress().isEmpty()
+                            || parcel.getDeliveryAddress().equals("Address not specified")) {
+                        parcel.setDeliveryAddress(locations.getT2().address);
+                    }
 
-            return parcelRepository.saveWithGeometry(parcel)
-                    .flatMap(savedParcel -> 
-                        petriNetClient.initializeParcelNet(savedParcel.getId())
-                            .map(netId -> savedParcel) // If successful, return saved parcel
-                            // Use map to transform result, but if it fails, the error will propagate
-                            .thenReturn(parcelMapper.toResponseDTO(savedParcel))
-                    );
-        });
+                    parcel.setTrackingCode("TRK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                    parcel.setCurrentState(ParcelState.PLANNED);
+                    parcel.setPriority(com.yowyob.delivery.route.domain.enums.ParcelPriority.NORMAL);
+
+                    if (parcel.getDeliveryFeeXaf() == null) {
+                        parcel.setDeliveryFeeXaf(0.0);
+                    }
+
+                    return parcelRepository.saveWithGeometry(parcel)
+                            .flatMap(savedParcel -> petriNetClient.initializeParcelNet(savedParcel.getId())
+                                    .flatMap(netId -> {
+                                        savedParcel.setPetriNetId(netId);
+                                        return parcelRepository.save(savedParcel); // Update with netId
+                                    })
+                                    .thenReturn(savedParcel)
+                                    .map(parcelMapper::toResponseDTO));
+                });
     }
 
     private static class ResolvedLocation {
         final String location;
         final String address;
+
         ResolvedLocation(String location, String address) {
             this.location = location;
             this.address = address;

@@ -2,6 +2,7 @@ package com.yowyob.delivery.route.service.strategy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RoutingConstraintsDTO;
 import com.yowyob.delivery.route.domain.entity.Hub;
 import com.yowyob.delivery.route.domain.entity.Route;
@@ -120,25 +121,204 @@ public class OsrmRoutingStrategy implements RoutingStrategy {
     }
 
     @Override
-    public Mono<Route> recalculateRoute(Route currentRoute, Object incident) {
+    public Mono<Route> recalculateRoute(Route currentRoute, IncidentDTO incident) {
+        log.info("=== OSRM STRATEGY: recalculateRoute called ===");
+
         if (currentRoute.getStartHubId() == null || currentRoute.getEndHubId() == null) {
+            log.warn("No hub IDs in route, cannot recalculate");
+            return Mono.just(currentRoute);
+        }
+
+        // Validate incident data
+        if (incident == null || incident.getLineStart() == null || incident.getLineEnd() == null) {
+            log.warn("Incomplete incident data, returning original route");
             return Mono.just(currentRoute);
         }
 
         return Mono.zip(
                 hubRepository.findById(currentRoute.getStartHubId()),
                 hubRepository.findById(currentRoute.getEndHubId())).flatMap(tuple -> {
-                    // Re-calculate using OSRM
-                    return calculateOptimalRoute(tuple.getT1(), tuple.getT2(), null)
-                            .map(newRoute -> {
-                                newRoute.setId(currentRoute.getId());
-                                newRoute.setParcelId(currentRoute.getParcelId());
-                                newRoute.setDriverId(currentRoute.getDriverId());
-                                newRoute.setStartHubId(currentRoute.getStartHubId());
-                                newRoute.setEndHubId(currentRoute.getEndHubId());
-                                newRoute.setCreatedAt(currentRoute.getCreatedAt());
-                                return newRoute;
-                            });
+                    try {
+                        Hub startHub = tuple.getT1();
+                        Hub endHub = tuple.getT2();
+
+                        // Extract current position from route geometry (first point)
+                        String wkt = currentRoute.getRouteGeometry();
+                        if (wkt == null || !wkt.startsWith("LINESTRING")) {
+                            log.warn("Invalid route geometry");
+                            return Mono.just(currentRoute);
+                        }
+
+                        // Parse WKT to get current position (first coordinate) using WKTReader
+                        LineString routeLine = (LineString) wktReader.read(wkt);
+                        if (routeLine.getNumPoints() < 2) {
+                            log.warn("Route geometry has insufficient points");
+                            return Mono.just(currentRoute);
+                        }
+
+                        // Current position is the first point in the route
+                        Coordinate firstCoord = routeLine.getCoordinateN(0);
+                        double currentLng = firstCoord.x;
+                        double currentLat = firstCoord.y;
+
+                        // End position
+                        org.locationtech.jts.geom.Point endPoint = (org.locationtech.jts.geom.Point) wktReader
+                                .read(endHub.getLocation());
+                        double endLng = endPoint.getX();
+                        double endLat = endPoint.getY();
+
+                        log.info("Current position: ({}, {})", currentLng, currentLat);
+                        log.info("End position: ({}, {})", endLng, endLat);
+
+                        // Check if route intersects incident using GeometryUtils
+                        boolean intersects = GeometryUtils.doesRouteIntersectIncident(
+                                currentLat, currentLng, endLat, endLng, incident);
+
+                        if (!intersects) {
+                            log.info("Route does NOT intersect incident buffer - no recalculation needed");
+                            return Mono.just(currentRoute);
+                        }
+
+                        log.info("Route INTERSECTS incident - calculating intelligent waypoint");
+
+                        // Calculate incident line midpoint and direction
+                        double incidentStartLat = incident.getLineStart().getLatitude();
+                        double incidentStartLng = incident.getLineStart().getLongitude();
+                        double incidentEndLat = incident.getLineEnd().getLatitude();
+                        double incidentEndLng = incident.getLineEnd().getLongitude();
+
+                        double incidentMidLat = (incidentStartLat + incidentEndLat) / 2;
+                        double incidentMidLng = (incidentStartLng + incidentEndLng) / 2;
+
+                        // Calculate incident line direction vector
+                        double incidentDx = incidentEndLng - incidentStartLng;
+                        double incidentDy = incidentEndLat - incidentStartLat;
+                        double incidentLength = Math.sqrt(incidentDx * incidentDx + incidentDy * incidentDy);
+
+                        // Normalize
+                        double incidentUnitX = incidentDx / incidentLength;
+                        double incidentUnitY = incidentDy / incidentLength;
+
+                        // Calculate perpendicular vector (rotate 90° counterclockwise)
+                        double perpX = -incidentUnitY;
+                        double perpY = incidentUnitX;
+
+                        log.info("Incident midpoint: ({}, {})", incidentMidLng, incidentMidLat);
+                        log.info("Perpendicular direction: ({}, {})", perpX, perpY);
+
+                        // Calculate waypoint distance: buffer + safety margin
+                        double bufferMeters = incident.getBufferDistance();
+                        double bufferDeg = bufferMeters / 111000.0; // Convert to degrees
+                        double safetyMargin = 0.002; // ~220m
+                        double waypointDistance = bufferDeg + safetyMargin;
+
+                        log.info("Buffer: {}m ({}°), Total waypoint distance: {}°", bufferMeters, bufferDeg,
+                                waypointDistance);
+
+                        // Determine which side of the incident to place the waypoint
+                        // Project current position onto perpendicular axis
+                        double currentToIncidentX = currentLng - incidentMidLng;
+                        double currentToIncidentY = currentLat - incidentMidLat;
+                        double projectionOnPerp = currentToIncidentX * perpX + currentToIncidentY * perpY;
+
+                        // Choose the same side as current position, or opposite if too close
+                        double direction = (projectionOnPerp >= 0) ? 1.0 : -1.0;
+
+                        // Calculate waypoint position
+                        double waypointLng = incidentMidLng + perpX * waypointDistance * direction;
+                        double waypointLat = incidentMidLat + perpY * waypointDistance * direction;
+
+                        log.info("Waypoint calculated at: ({}, {}) with direction: {}", waypointLng, waypointLat,
+                                direction);
+
+                        // Verify waypoint is outside incident buffer
+                        double waypointToIncidentDist = Math.sqrt(
+                                Math.pow(waypointLng - incidentMidLng, 2) +
+                                        Math.pow(waypointLat - incidentMidLat, 2));
+                        log.info("Waypoint distance from incident: {}° (should be > {}°)", waypointToIncidentDist,
+                                bufferDeg);
+
+                        // Create OSRM request with 3 points: current position -> waypoint -> end
+                        String coordinates = String.format(java.util.Locale.US, "%f,%f;%f,%f;%f,%f",
+                                currentLng, currentLat,
+                                waypointLng, waypointLat,
+                                endLng, endLat);
+
+                        String url = String.format("%s/%s?overview=full&geometries=geojson", osrmApiUrl, coordinates);
+                        log.info("Requesting OSRM detour route: {}", url);
+
+                        return webClientBuilder.build()
+                                .get()
+                                .uri(url)
+                                .retrieve()
+                                .bodyToMono(String.class)
+                                .flatMap(json -> {
+                                    try {
+                                        org.locationtech.jts.geom.Point startPoint = geometryFactory
+                                                .createPoint(new Coordinate(currentLng, currentLat));
+                                        return parseOsrmResponse(json, startPoint, endPoint, startHub.getId(),
+                                                endHub.getId());
+                                    } catch (Exception e) {
+                                        log.error("Failed to parse detour response", e);
+                                        return Mono.error(new RuntimeException("Failed to parse detour response", e));
+                                    }
+                                })
+                                .map(newRoute -> {
+                                    newRoute.setId(currentRoute.getId());
+                                    newRoute.setParcelId(currentRoute.getParcelId());
+                                    newRoute.setDriverId(currentRoute.getDriverId());
+                                    newRoute.setStartHubId(currentRoute.getStartHubId());
+                                    newRoute.setEndHubId(currentRoute.getEndHubId());
+                                    newRoute.setCreatedAt(currentRoute.getCreatedAt());
+                                    newRoute.setRoutingService("OSRM_DETOUR");
+                                    log.info("=== OSRM DETOUR: Route updated successfully ===");
+                                    return newRoute;
+                                });
+
+                    } catch (Exception e) {
+                        log.error("Error during route recalculation", e);
+                        return Mono.error(new RuntimeException("Failed to recalculate route", e));
+                    }
                 });
+    }
+
+    private Mono<Route> calculateRouteWithWaypoint(Hub start, Hub end, double waypointLat, double waypointLng,
+            Route currentRoute) {
+        try {
+            org.locationtech.jts.geom.Point startPoint = (org.locationtech.jts.geom.Point) wktReader
+                    .read(start.getLocation());
+            org.locationtech.jts.geom.Point endPoint = (org.locationtech.jts.geom.Point) wktReader
+                    .read(end.getLocation());
+
+            // Create OSRM request with 3 points: start -> waypoint -> end
+            String coordinates = String.format(java.util.Locale.US, "%f,%f;%f,%f;%f,%f",
+                    startPoint.getX(), startPoint.getY(),
+                    waypointLng, waypointLat,
+                    endPoint.getX(), endPoint.getY());
+
+            String url = String.format("%s/%s?overview=full&geometries=geojson", osrmApiUrl, coordinates);
+
+            log.info("Requesting OSRM route with detour waypoint: {}", url);
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri(url)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .flatMap(json -> parseOsrmResponse(json, startPoint, endPoint, start.getId(), end.getId()))
+                    .map(newRoute -> {
+                        newRoute.setId(currentRoute.getId());
+                        newRoute.setParcelId(currentRoute.getParcelId());
+                        newRoute.setDriverId(currentRoute.getDriverId());
+                        newRoute.setStartHubId(currentRoute.getStartHubId());
+                        newRoute.setEndHubId(currentRoute.getEndHubId());
+                        newRoute.setCreatedAt(currentRoute.getCreatedAt());
+                        newRoute.setRoutingService("OSRM_DETOUR");
+                        return newRoute;
+                    });
+        } catch (Exception e) {
+            log.error("Failed to calculate route with waypoint", e);
+            return Mono.error(new RuntimeException("Failed to calculate detour route", e));
+        }
     }
 }

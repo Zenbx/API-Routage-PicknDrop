@@ -156,6 +156,12 @@ public class Parcel {
     private String notes;
 
     /**
+     * ID of the associated Petri Net instance.
+     */
+    @Column("petri_net_id")
+    private String petriNetId;
+
+    /**
      * Timestamp of parcel record creation.
      */
     @CreatedDate

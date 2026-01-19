@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.service.impl;
 
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RouteCalculationRequestDTO;
 import com.yowyob.delivery.route.controller.dto.RouteResponseDTO;
 import com.yowyob.delivery.route.controller.dto.RoutingConstraintsDTO;
@@ -78,10 +79,20 @@ public class RouteServiceImpl implements RouteService {
          * an incident.
          */
         @Override
-        public Mono<RouteResponseDTO> recalculateRoute(UUID routeId, Object incident) {
+        public Mono<RouteResponseDTO> recalculateRoute(UUID routeId, IncidentDTO incident) {
                 return routeRepository.findById(routeId)
                                 .flatMap(route -> {
-                                        RoutingStrategy strategy = selectStrategy(null); // Default or based on route
+                                        // Use the same algorithm that was used for initial calculation
+                                        String algorithm = route.getRoutingService();
+                                        RoutingConstraintsDTO constraints = new RoutingConstraintsDTO();
+
+                                        if (algorithm != null && !algorithm.isEmpty()) {
+                                                // Extract base algorithm name (e.g., "OSRM" from "OSRM" or "BASIC_DETOUR")
+                                                String baseAlgo = algorithm.split("_")[0];
+                                                constraints.setAlgorithm(baseAlgo);
+                                        }
+
+                                        RoutingStrategy strategy = selectStrategy(constraints);
                                         return strategy.recalculateRoute(route, incident)
                                                         .flatMap(routeRepository::saveWithGeometry)
                                                         .map(routeMapper::toResponseDTO);

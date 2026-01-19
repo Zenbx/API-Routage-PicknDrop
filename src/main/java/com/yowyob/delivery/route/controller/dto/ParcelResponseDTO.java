@@ -75,6 +75,12 @@ public class ParcelResponseDTO {
     private LocalDateTime estimatedDeliveryTime;
 
     /**
+     * ID of the associated Petri Net instance for lifecycle tracking.
+     */
+    @Schema(description = "ID of the associated Petri Net instance", example = "net-123456")
+    private String petriNetId;
+
+    /**
      * Timestamp when the parcel record was created.
      */
     @Schema(description = "Timestamp when the parcel was registered")

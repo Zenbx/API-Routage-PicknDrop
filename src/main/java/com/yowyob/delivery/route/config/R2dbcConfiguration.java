@@ -8,14 +8,29 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import org.springframework.data.r2dbc.dialect.PostgresDialect;
 
-import java.util.List;
+import java.util.Arrays;
 
 @Configuration
 public class R2dbcConfiguration {
 
     @Bean
     public R2dbcCustomConversions r2dbcCustomConversions() {
-        return R2dbcCustomConversions.of(PostgresDialect.INSTANCE, List.of(new LineStringToStringConverter()));
+        return R2dbcCustomConversions.of(
+                PostgresDialect.INSTANCE,
+                Arrays.asList(
+                    // Converters pour les enums
+                    new EnumConverters.ParcelStateToStringConverter(),
+                    new EnumConverters.StringToParcelStateConverter(),
+                    new EnumConverters.ParcelPriorityToStringConverter(),
+                    new EnumConverters.StringToParcelPriorityConverter(),
+                    new EnumConverters.DriverStateToStringConverter(),
+                    new EnumConverters.StringToDriverStateConverter(),
+                    // Converters pour les géométries
+                    new GeometryConverters.JtsPointToStringConverter(),
+                    new GeometryConverters.StringToJtsPointConverter(),
+                    new LineStringToStringConverter()
+                )
+        );
     }
 
     @ReadingConverter

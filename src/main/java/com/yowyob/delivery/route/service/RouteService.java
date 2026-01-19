@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.service;
 
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RouteCalculationRequestDTO;
 import com.yowyob.delivery.route.controller.dto.RouteResponseDTO;
 import reactor.core.publisher.Mono;
@@ -23,10 +24,10 @@ public interface RouteService {
      * road closure).
      *
      * @param routeId  the UUID of the route to recalculate
-     * @param incident information about the disruption
+     * @param incident information about the disruption (linear or circular)
      * @return a Mono emitting the updated route
      */
-    Mono<RouteResponseDTO> recalculateRoute(UUID routeId, Object incident);
+    Mono<RouteResponseDTO> recalculateRoute(UUID routeId, IncidentDTO incident);
 
     /**
      * Retrieves an existing route by its unique identifier.

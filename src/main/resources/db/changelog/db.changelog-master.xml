@@ -483,4 +483,5 @@
     <include file="db/changelog/009-add-bidirectional-connections.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/010-insert-drivers.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/011-add-route-hubs.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/012-add-parcel-petri-net-id.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

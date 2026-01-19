@@ -6,28 +6,24 @@ import com.yowyob.delivery.route.domain.entity.Parcel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(
-    componentModel = "spring",
-    uses = { GeoPointMapper.class }  // ← Gardez juste GeoPointMapper
+@Mapper(componentModel = "spring", uses = { GeoPointMapper.class } // ← Gardez juste GeoPointMapper
 )
 public interface ParcelMapper {
 
     // Entity → Response DTO
-    @Mapping(
-        target = "pickupLocation",
-        source = "pickupLocation",
-        qualifiedByName = "wktStringToGeoDto"  // ← NOUVEAU NOM
+    @Mapping(target = "pickupLocation", source = "pickupLocation", qualifiedByName = "wktStringToGeoDto" // ← NOUVEAU
+                                                                                                         // NOM
     )
-    @Mapping(
-        target = "deliveryLocation",
-        source = "deliveryLocation",
-        qualifiedByName = "wktStringToGeoDto"  // ← NOUVEAU NOM
+    @Mapping(target = "deliveryLocation", source = "deliveryLocation", qualifiedByName = "wktStringToGeoDto" // ←
+                                                                                                             // NOUVEAU
+                                                                                                             // NOM
     )
     @Mapping(target = "priority", expression = "java(parcel.getPriority().name())")
+    @Mapping(target = "petriNetId", source = "petriNetId")
     ParcelResponseDTO toResponseDTO(Parcel parcel);
 
     // Request DTO → Entity
-    @Mapping(target = "pickupLocation", source = "pickupLocation")  // ← String → String, pas de conversion
+    @Mapping(target = "pickupLocation", source = "pickupLocation") // ← String → String, pas de conversion
     @Mapping(target = "deliveryLocation", source = "deliveryLocation")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "trackingCode", ignore = true)

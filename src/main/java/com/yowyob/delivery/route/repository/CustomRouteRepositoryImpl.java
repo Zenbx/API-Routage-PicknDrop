@@ -33,12 +33,14 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 
     private Mono<Route> insertWithGeometry(Route route) {
         UUID id = UUID.randomUUID();
-        var spec = databaseClient.sql("INSERT INTO routes (id, parcel_id, driver_id, route_geometry, waypoints, total_distance_km, estimated_duration_minutes, routing_service, traffic_factor, is_active, created_at) " +
-                "VALUES (:id, :parcel_id, :driver_id, ST_GeomFromText(:route_geometry, 4326), :waypoints::jsonb, :total_distance_km, :estimated_duration_minutes, :routing_service, :traffic_factor, :is_active, :created_at)")
+        var spec = databaseClient.sql("INSERT INTO routes (id, parcel_id, driver_id, start_hub_id, end_hub_id, route_geometry, waypoints, total_distance_km, estimated_duration_minutes, routing_service, traffic_factor, is_active, created_at) " +
+                "VALUES (:id, :parcel_id, :driver_id, :start_hub_id, :end_hub_id, ST_GeomFromText(:route_geometry, 4326), :waypoints::jsonb, :total_distance_km, :estimated_duration_minutes, :routing_service, :traffic_factor, :is_active, :created_at)")
                 .bind("id", id)
                 .bind("parcel_id", route.getParcelId());
-        
+
         spec = bindNullable(spec, "driver_id", route.getDriverId(), UUID.class);
+        spec = bindNullable(spec, "start_hub_id", route.getStartHubId(), UUID.class);
+        spec = bindNullable(spec, "end_hub_id", route.getEndHubId(), UUID.class);
         spec = spec.bind("route_geometry", route.getRouteGeometry())
                 .bind("waypoints", route.getWaypoints() == null ? "[]" : route.getWaypoints())
                 .bind("total_distance_km", route.getTotalDistanceKm())
@@ -59,13 +61,15 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     }
 
     private Mono<Route> updateWithGeometry(Route route) {
-        var spec = databaseClient.sql("UPDATE routes SET parcel_id = :parcel_id, driver_id = :driver_id, route_geometry = ST_GeomFromText(:route_geometry, 4326), " +
+        var spec = databaseClient.sql("UPDATE routes SET parcel_id = :parcel_id, driver_id = :driver_id, start_hub_id = :start_hub_id, end_hub_id = :end_hub_id, route_geometry = ST_GeomFromText(:route_geometry, 4326), " +
                 "waypoints = :waypoints::jsonb, total_distance_km = :total_distance_km, estimated_duration_minutes = :estimated_duration_minutes, " +
                 "routing_service = :routing_service, traffic_factor = :traffic_factor, is_active = :is_active WHERE id = :id")
                 .bind("id", route.getId())
                 .bind("parcel_id", route.getParcelId());
-        
+
         spec = bindNullable(spec, "driver_id", route.getDriverId(), UUID.class);
+        spec = bindNullable(spec, "start_hub_id", route.getStartHubId(), UUID.class);
+        spec = bindNullable(spec, "end_hub_id", route.getEndHubId(), UUID.class);
         spec = spec.bind("route_geometry", route.getRouteGeometry())
                 .bind("waypoints", route.getWaypoints() == null ? "[]" : route.getWaypoints())
                 .bind("total_distance_km", route.getTotalDistanceKm())

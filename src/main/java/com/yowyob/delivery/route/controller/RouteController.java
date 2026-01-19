@@ -1,5 +1,6 @@
 package com.yowyob.delivery.route.controller;
 
+import com.yowyob.delivery.route.controller.dto.IncidentDTO;
 import com.yowyob.delivery.route.controller.dto.RouteCalculationRequestDTO;
 import com.yowyob.delivery.route.controller.dto.RouteResponseDTO;
 import com.yowyob.delivery.route.service.RouteService;
@@ -82,7 +83,20 @@ public class RouteController {
      */
     @PostMapping("/{id}/recalculate")
     @Operation(summary = "Recalculate route", description = "Updates an existing route path in response to real-time events like traffic or road incidents.")
-    public Mono<RouteResponseDTO> recalculateRoute(@PathVariable UUID id, @RequestBody Object incident) {
-        return routeService.recalculateRoute(id, incident);
+    public Mono<RouteResponseDTO> recalculateRoute(@PathVariable UUID id, @RequestBody IncidentDTO incident) {
+        System.out.println("=== RECALCULATE ROUTE REQUEST ===");
+        System.out.println("Route ID: " + id);
+        System.out.println("Incident data: " + incident);
+        System.out.println("Incident type: " + (incident != null ? incident.getType() : "null"));
+        System.out.println("Linear incident: " + (incident != null && incident.getLineStart() != null && incident.getLineEnd() != null));
+        return routeService.recalculateRoute(id, incident)
+            .doOnSuccess(result -> {
+                System.out.println("=== RECALCULATION SUCCESS ===");
+                System.out.println("Result: " + result);
+            })
+            .doOnError(error -> {
+                System.err.println("=== RECALCULATION ERROR ===");
+                error.printStackTrace();
+            });
     }
 }
