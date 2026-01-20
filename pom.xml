@@ -138,9 +138,9 @@
             <version>4.29.2</version>
             <configuration>
                 <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
-                <url>jdbc:postgresql://localhost:5432/pickndrop_db</url>
-                <username>postgres</username>
-                <password>jeff1234</password>
+                <url>jdbc:postgresql://${env.DB_HOST:-localhost}:${env.DB_PORT:-5432}/${env.DB_NAME:-pickndrop_db}</url>
+                <username>${env.DB_USER:-postgres}</username>
+                <password>${env.DB_PASSWORD:-jeff1234}</password>
                 <driver>org.postgresql.Driver</driver>
             </configuration>
         </plugin>
